@@ -1,5 +1,6 @@
 exports.handler = async (event) => {
   try {
+    // ===== 1. Parse body safely =====
     let bodyString = "";
 
     if (event.isBase64Encoded) {
@@ -19,14 +20,26 @@ exports.handler = async (event) => {
 
     const params = new URLSearchParams(bodyString);
 
-    const incomingMsg = (params.get("Body") || "").trim();
+    // ===== 2. Clean incoming message properly =====
+    const rawMsg = params.get("Body") || "";
+
+    const incomingMsg = rawMsg
+      .toString()
+      .trim()
+      .replace(/\s+/g, "")   // removes spaces/newlines
+      .toLowerCase();
+
     const phone = (params.get("From") || "").replace("whatsapp:", "");
 
-    console.log("Incoming:", incomingMsg, "Phone:", phone);
+    console.log("RAW:", rawMsg);
+    console.log("CLEAN:", incomingMsg);
+    console.log("Phone:", phone);
 
+    // ===== 3. Supabase config =====
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
+    // ===== 4. Fetch latest lead =====
     let lead = {};
     try {
       const leadRes = await fetch(
@@ -50,8 +63,8 @@ exports.handler = async (event) => {
 
     let reply = "";
 
-    // ✅ USER SELECTED DURATION
-    if (["1", "2", "3"].includes(incomingMsg)) {
+    // ===== 5. Handle duration selection =====
+    if (incomingMsg === "1" || incomingMsg === "2" || incomingMsg === "3") {
 
       let selectionText = "";
 
@@ -66,7 +79,8 @@ Our 3-month crash course is built for focused revision and maximum score improve
 🧪 High-impact mock tests  
 
 A mentor will contact you within 10–15 minutes to get you started immediately.`;
-      } 
+      }
+
       else if (incomingMsg === "2") {
         selectionText = "6 months";
         reply = `Excellent choice 👍
@@ -78,7 +92,8 @@ Our 6-month program is designed for serious preparation with structure and consi
 📈 Performance tracking & strategy  
 
 A mentor will contact you within 10–15 minutes to guide you personally.`;
-      } 
+      }
+
       else if (incomingMsg === "3") {
         selectionText = "1 year";
         reply = `Perfect choice 👍
@@ -92,6 +107,7 @@ Our 1-year program is a complete end-to-end system designed for top results.
 A mentor will contact you within 10–15 minutes to plan your preparation journey.`;
       }
 
+      // ===== 6. Store in Supabase =====
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
@@ -113,7 +129,7 @@ A mentor will contact you within 10–15 minutes to plan your preparation journe
 
     } 
     
-    // ✅ FIRST MESSAGE
+    // ===== 7. First message =====
     else {
       reply = `Hi ${name}, thanks for your interest in ${interest} 👋
 
@@ -126,6 +142,7 @@ To recommend the best plan, choose your preferred duration:
 Reply with 1 / 2 / 3`;
     }
 
+    // ===== 8. Return Twilio response =====
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/xml" },
