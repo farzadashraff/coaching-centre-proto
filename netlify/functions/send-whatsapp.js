@@ -1,7 +1,15 @@
 exports.handler = async (event) => {
   try {
-    // ✅ SAFETY: handle empty body
-    if (!event.body) {
+    // ✅ FIX: handle base64 encoded body (CRITICAL)
+    let bodyString = "";
+
+    if (event.isBase64Encoded) {
+      bodyString = Buffer.from(event.body, "base64").toString("utf-8");
+    } else {
+      bodyString = event.body || "";
+    }
+
+    if (!bodyString) {
       console.log("No body received");
       return {
         statusCode: 200,
@@ -10,7 +18,7 @@ exports.handler = async (event) => {
       };
     }
 
-    const params = new URLSearchParams(event.body);
+    const params = new URLSearchParams(bodyString);
 
     const incomingMsg = (params.get("Body") || "").trim();
     const phone = params.get("From") || "";
@@ -22,15 +30,9 @@ exports.handler = async (event) => {
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-    if (!SUPABASE_SERVICE_KEY) {
-      console.log("❌ Missing SUPABASE_SERVICE_KEY");
-    }
-
-    // ✅ ONLY SAVE WHEN VALID INPUT
     if (["1", "2", "3"].includes(incomingMsg)) {
 
       try {
-        // 🔍 STEP 1: Get name from Leads table (FIXED)
         const cleanPhone = phone.replace("whatsapp:", "");
 
         const leadRes = await fetch(
@@ -46,16 +48,12 @@ exports.handler = async (event) => {
         const leadData = await leadRes.json();
         const name = leadData[0]?.name || "Unknown";
 
-        console.log("Fetched name:", name);
-
-        // 💾 STEP 2: Save interaction WITH name
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
+        await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
           headers: {
             "apikey": SUPABASE_SERVICE_KEY,
             "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=representation"
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
             phone: phone,
@@ -64,40 +62,28 @@ exports.handler = async (event) => {
           })
         });
 
-        const data = await res.text();
-        console.log("SUPABASE RESPONSE:", data);
-
-      } catch (dbErr) {
-        console.log("❌ DB ERROR:", dbErr);
+      } catch (err) {
+        console.log("DB ERROR:", err);
       }
 
-      // Replies
       if (incomingMsg === "1") {
-        reply = `You selected 3 month crash course.
-
-Thank you for choosing us. You will be receiving a call shortly. Welcome to our community.`;
+        reply = `You selected 3 month crash course.`;
       } 
       else if (incomingMsg === "2") {
-        reply = `You selected 6 month crash course with weekly tests.
-
-Thank you for choosing us. You will be receiving a call shortly. Welcome to our community.`;
+        reply = `You selected 6 month crash course with weekly tests.`;
       } 
       else if (incomingMsg === "3") {
-        reply = `You selected 1 year full training program.
-
-Thank you for choosing us. You will be receiving a call shortly. Welcome to our community.`;
+        reply = `You selected 1 year full training program.`;
       }
 
     } else {
-      reply = `Hi, welcome to Fazz Coaching 👋
-
-Here are our programs:
+      reply = `Hi, welcome 👋
 
 1️⃣ 3 month crash course  
-2️⃣ 6 month crash course + weekly tests  
-3️⃣ 1 year full training  
+2️⃣ 6 month crash course  
+3️⃣ 1 year program  
 
-Reply 1 / 2 / 3 to continue`;
+Reply 1 / 2 / 3`;
     }
 
     return {
@@ -107,11 +93,11 @@ Reply 1 / 2 / 3 to continue`;
     };
 
   } catch (err) {
-    console.error("🔥 FUNCTION ERROR:", err);
+    console.error("ERROR:", err);
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/xml" },
-      body: `<Response><Message>Error occurred</Message></Response>`
+      body: `<Response><Message>Error</Message></Response>`
     };
   }
 };
