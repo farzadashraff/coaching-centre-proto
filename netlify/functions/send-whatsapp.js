@@ -1,20 +1,26 @@
 exports.handler = async (event) => {
   try {
-    // ✅ FIX: handle base64 encoded body (CRITICAL)
     let bodyString = "";
 
-    if (event.isBase64Encoded) {
-      bodyString = Buffer.from(event.body, "base64").toString("utf-8");
-    } else {
-      bodyString = event.body || "";
+    // ✅ handle ALL possible cases
+    if (event.body) {
+      if (event.isBase64Encoded) {
+        bodyString = Buffer.from(event.body, "base64").toString("utf-8");
+      } else {
+        bodyString = event.body;
+      }
+    } else if (event.rawBody) {
+      bodyString = event.rawBody;
     }
 
+    console.log("RAW EVENT:", JSON.stringify(event));
+
     if (!bodyString) {
-      console.log("No body received");
+      console.log("No body received AFTER ALL CHECKS");
       return {
         statusCode: 200,
         headers: { "Content-Type": "text/xml" },
-        body: `<Response><Message>OK</Message></Response>`
+        body: `<Response><Message>Still no body</Message></Response>`
       };
     }
 
