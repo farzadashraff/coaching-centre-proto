@@ -1,6 +1,5 @@
 exports.handler = async (event) => {
   try {
-    // ✅ Handle body (Twilio sends x-www-form-urlencoded)
     let bodyString = "";
 
     if (event.isBase64Encoded) {
@@ -25,11 +24,9 @@ exports.handler = async (event) => {
 
     console.log("Incoming:", incomingMsg, "Phone:", phone);
 
-    // ✅ Supabase config
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-    // ✅ Fetch latest lead
     let lead = {};
     try {
       const leadRes = await fetch(
@@ -62,28 +59,39 @@ exports.handler = async (event) => {
         selectionText = "3 months";
         reply = `Great choice 👍
 
-Our 3-month crash course is designed for quick revision and high-impact results.
+Our 3-month crash course is built for focused revision and maximum score improvement in a short time.
 
-Our team will contact you shortly.`;
+⚡ Rapid syllabus coverage  
+🎯 Exam-focused strategies  
+🧪 High-impact mock tests  
+
+A mentor will contact you within 10–15 minutes to get you started immediately.`;
       } 
       else if (incomingMsg === "2") {
         selectionText = "6 months";
-        reply = `Excellent 👍
+        reply = `Excellent choice 👍
 
-The 6-month program includes structured learning + weekly tests.
+Our 6-month program is designed for serious preparation with structure and consistent improvement.
 
-Our team will reach out to guide you further.`;
+📊 Personalized study plan  
+🧪 Weekly mock tests  
+📈 Performance tracking & strategy  
+
+A mentor will contact you within 10–15 minutes to guide you personally.`;
       } 
       else if (incomingMsg === "3") {
         selectionText = "1 year";
-        reply = `Perfect 👍
+        reply = `Perfect choice 👍
 
-The 1-year program is a complete end-to-end preparation system.
+Our 1-year program is a complete end-to-end system designed for top results.
 
-Our team will contact you with full details shortly.`;
+📚 Full syllabus coverage  
+🧠 Concept mastery + doubt solving  
+📊 Continuous testing & analysis  
+
+A mentor will contact you within 10–15 minutes to plan your preparation journey.`;
       }
 
-      // ✅ Store interaction
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
@@ -105,7 +113,7 @@ Our team will contact you with full details shortly.`;
 
     } 
     
-    // ✅ FIRST MESSAGE (MAIN ENTRY)
+    // ✅ FIRST MESSAGE
     else {
       reply = `Hi ${name}, thanks for your interest in ${interest} 👋
 
