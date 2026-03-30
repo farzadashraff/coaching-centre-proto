@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lead Capture</title>
+</head>
+<body>
+
+<h2>Student Inquiry Form</h2>
+
+<form id="leadForm">
+  <input type="text" id="name" placeholder="Name" required /><br><br>
+  <input type="text" id="phone" placeholder="Phone" required /><br><br>
+
+  <!-- ✅ STAGE (REPLACED CLASS) -->
+  <select id="stage" required>
+    <option value="">Select Academic Stage</option>
+    <option value="School (Class 9-10)">School (Class 9-10)</option>
+    <option value="School (Class 11-12)">School (Class 11-12)</option>
+    <option value="Dropper">Dropper</option>
+    <option value="Undergraduate">Undergraduate</option>
+    <option value="Postgraduate">Postgraduate</option>
+    <option value="Working Professional">Working Professional</option>
+  </select><br><br>
+
+  <!-- ✅ CATEGORY -->
+  <select id="category" required>
+    <option value="">Select Category</option>
+    <option value="Engineering">Engineering & Technology</option>
+    <option value="Medical">Medical</option>
+    <option value="Abroad">Abroad / International</option>
+    <option value="Government">Government & Civil Services</option>
+    <option value="Professional">Professional Certifications</option>
+    <option value="Design">Design & Architecture</option>
+  </select><br><br>
+
+  <!-- ✅ EXAM -->
+  <select id="exam" required>
+    <option value="">Select Exam</option>
+  </select><br><br>
+
+  <button type="submit">Submit</button>
+</form>
+
+<br>
+
+<button id="whatsappBtn" style="display:none;">
+  Message us on WhatsApp
+</button>
+
+<!-- ✅ SUPABASE -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
+  const supabaseUrl = "https://xsdalnxweznnjzogyqaa.supabase.co";
+  const supabaseKey = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
+
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  // ✅ EXAM DATA
+  const examOptions = {
+    Engineering: [
+      "JEE", "GATE", "BITSAT", "VITEEE",
+      "FE Exam (USA)", "GRE Engineering"
+    ],
+    Medical: [
+      "NEET UG", "NEET PG", "FMGE", "INI-CET",
+      "USMLE Step 1", "USMLE Step 2", "USMLE Step 3",
+      "PLAB 1", "PLAB 2", "AMC", "MCCQE"
+    ],
+    Abroad: [
+      "IELTS", "TOEFL", "PTE", "Duolingo",
+      "GRE", "GMAT", "SAT", "ACT",
+      "JLPT", "DELF", "Goethe"
+    ],
+    Government: [
+      "UPSC", "SSC", "RRB", "IBPS", "SBI",
+      "CLAT", "NDA", "USPS", "TSA", "ASVAB"
+    ],
+    Professional: [
+      "CFA", "CPA", "ACCA", "CA",
+      "FRM", "CFP", "LSAT", "SQE",
+      "PMP", "AWS", "CISSP"
+    ],
+    Design: [
+      "NATA", "NID DAT", "UCEED", "ARE"
+    ]
+  };
+
+  // ✅ LOAD EXAMS BASED ON CATEGORY
+  document.getElementById("category").addEventListener("change", function () {
+    const selectedCategory = this.value;
+    const examDropdown = document.getElementById("exam");
+
+    examDropdown.innerHTML = '<option value="">Select Exam</option>';
+
+    if (examOptions[selectedCategory]) {
+      examOptions[selectedCategory].forEach(exam => {
+        const option = document.createElement("option");
+        option.value = exam;
+        option.textContent = exam;
+        examDropdown.appendChild(option);
+      });
+    }
+  });
+
+  // ✅ FORM SUBMIT
+  document.getElementById("leadForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    let phone = document.getElementById("phone").value.trim();
+    const stage = document.getElementById("stage").value;
+    const category = document.getElementById("category").value;
+    const exam = document.getElementById("exam").value;
+
+    // normalize phone
+    phone = phone.replace(/\s+/g, "");
+
+    if (!phone.startsWith("+91")) {
+      if (phone.startsWith("91")) {
+        phone = "+" + phone;
+      } else if (phone.startsWith("0")) {
+        phone = "+91" + phone.substring(1);
+      } else {
+        phone = "+91" + phone;
+      }
+    }
+
+    try {
+      const { error } = await supabaseClient
+        .from("Leads")
+        .insert([
+          {
+            name: name,
+            phone: phone,
+            stage: stage,
+            category: category,
+            exam: exam
+          }
+        ]);
+
+      if (error) {
+        alert("Error: " + error.message);
+        return;
+      }
+
+      alert("Form submitted successfully");
+
+      const message = `Hi, I am ${name}, currently ${stage}. I am interested in ${exam} under ${category}.`;
+      const encodedMessage = encodeURIComponent(message);
+
+      const whatsappURL = `https://api.whatsapp.com/send?phone=14155238886&text=${encodedMessage}`;
+
+      const btn = document.getElementById("whatsappBtn");
+      btn.style.display = "block";
+
+      btn.onclick = () => {
+        window.open(whatsappURL, "_blank");
+      };
+
+    } catch (err) {
+      alert("Unexpected error");
+      console.error(err);
+    }
+  });
+</script>
+
+</body>
+</html>
