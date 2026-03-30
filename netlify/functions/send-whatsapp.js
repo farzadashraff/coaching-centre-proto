@@ -1,6 +1,5 @@
 exports.handler = async (event) => {
   try {
-    // ===== 1. Parse body safely =====
     let bodyString = "";
 
     if (event.isBase64Encoded) {
@@ -9,40 +8,20 @@ exports.handler = async (event) => {
       bodyString = event.body || "";
     }
 
-    if (!bodyString) {
-      console.log("No body received");
-      return {
-        statusCode: 200,
-        headers: { "Content-Type": "text/xml" },
-        body: `<Response></Response>`
-      };
-    }
-
     const params = new URLSearchParams(bodyString);
 
-    // ===== 2. Clean incoming message properly =====
     const rawMsg = params.get("Body") || "";
-
-    const incomingMsg = rawMsg
-      .toString()
-      .trim()
-      .replace(/\s+/g, "")   // removes spaces/newlines
-      .toLowerCase();
-
+    const incomingMsg = rawMsg.toString().trim().replace(/\s+/g, "");
     const phone = (params.get("From") || "").replace("whatsapp:", "");
 
-    console.log("RAW:", rawMsg);
-    console.log("CLEAN:", incomingMsg);
-    console.log("Phone:", phone);
+    console.log("MSG:", incomingMsg);
 
-    // ===== 3. Supabase config =====
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-    // ===== 4. Fetch latest lead =====
     let lead = {};
     try {
-      const leadRes = await fetch(
+      const res = await fetch(
         `${SUPABASE_URL}/rest/v1/Leads?phone=eq.${encodeURIComponent(phone)}&order=created_at.desc&limit=1`,
         {
           headers: {
@@ -51,11 +30,10 @@ exports.handler = async (event) => {
           }
         }
       );
-
-      const leadData = await leadRes.json();
-      lead = leadData?.[0] || {};
-    } catch (err) {
-      console.log("Lead fetch error:", err);
+      const data = await res.json();
+      lead = data?.[0] || {};
+    } catch (e) {
+      console.log("Lead fetch error");
     }
 
     const name = lead.name || "";
@@ -63,51 +41,60 @@ exports.handler = async (event) => {
 
     let reply = "";
 
-    // ===== 5. Handle duration selection =====
-    if (incomingMsg === "1" || incomingMsg === "2" || incomingMsg === "3") {
+    // ===== MAIN LOGIC =====
+    if (incomingMsg === "1") {
+      reply = `Great choice 👍
 
-      let selectionText = "";
+Our 3-month crash course is built for focused revision and maximum score improvement.
 
-      if (incomingMsg === "1") {
-        selectionText = "3 months";
-        reply = `Great choice 👍
+A mentor will contact you within 10–15 minutes.`;
 
-Our 3-month crash course is built for focused revision and maximum score improvement in a short time.
+      saveInteraction("3 months");
+    }
 
-⚡ Rapid syllabus coverage  
-🎯 Exam-focused strategies  
-🧪 High-impact mock tests  
+    else if (incomingMsg === "2") {
+      reply = `Excellent choice 👍
 
-A mentor will contact you within 10–15 minutes to get you started immediately.`;
-      }
+Our 6-month program includes structured learning and weekly tests.
 
-      else if (incomingMsg === "2") {
-        selectionText = "6 months";
-        reply = `Excellent choice 👍
+A mentor will contact you within 10–15 minutes.`;
 
-Our 6-month program is designed for serious preparation with structure and consistent improvement.
+      saveInteraction("6 months");
+    }
 
-📊 Personalized study plan  
-🧪 Weekly mock tests  
-📈 Performance tracking & strategy  
+    else if (incomingMsg === "3") {
+      reply = `Perfect choice 👍
 
-A mentor will contact you within 10–15 minutes to guide you personally.`;
-      }
+Our 1-year program is a complete preparation system.
 
-      else if (incomingMsg === "3") {
-        selectionText = "1 year";
-        reply = `Perfect choice 👍
+A mentor will contact you within 10–15 minutes.`;
 
-Our 1-year program is a complete end-to-end system designed for top results.
+      saveInteraction("1 year");
+    }
 
-📚 Full syllabus coverage  
-🧠 Concept mastery + doubt solving  
-📊 Continuous testing & analysis  
+    else {
+      reply = `Hi ${name}, thanks for your interest in ${interest} 👋
 
-A mentor will contact you within 10–15 minutes to plan your preparation journey.`;
-      }
+Choose your course duration:
 
-      // ===== 6. Store in Supabase =====
+1️⃣ 3 months  
+2️⃣ 6 months  
+3️⃣ 1 year  
+
+Reply 1 / 2 / 3`;
+    }
+
+    // ===== RESPONSE FIRST =====
+    const response = {
+      statusCode: 200,
+      headers: { "Content-Type": "text/xml" },
+      body: `<Response><Message>${reply}</Message></Response>`
+    };
+
+    return response;
+
+    // ===== SAVE AFTER RESPONSE (SAFE) =====
+    async function saveInteraction(selectionText) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
@@ -117,37 +104,16 @@ A mentor will contact you within 10–15 minutes to plan your preparation journe
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            phone: phone,
-            name: name,
-            interest: interest,
+            phone,
+            name,
+            interest,
             selection: selectionText
           })
         });
       } catch (err) {
-        console.log("DB ERROR:", err);
+        console.log("DB FAILED BUT BOT SAFE");
       }
-
-    } 
-    
-    // ===== 7. First message =====
-    else {
-      reply = `Hi ${name}, thanks for your interest in ${interest} 👋
-
-To recommend the best plan, choose your preferred duration:
-
-1️⃣ 3 months (Crash course)  
-2️⃣ 6 months (Guided prep + tests)  
-3️⃣ 1 year (Full training program)  
-
-Reply with 1 / 2 / 3`;
     }
-
-    // ===== 8. Return Twilio response =====
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "text/xml" },
-      body: `<Response><Message>${reply}</Message></Response>`
-    };
 
   } catch (err) {
     console.error("ERROR:", err);
@@ -155,7 +121,7 @@ Reply with 1 / 2 / 3`;
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/xml" },
-      body: `<Response><Message>Something went wrong</Message></Response>`
+      body: `<Response><Message>Error</Message></Response>`
     };
   }
 };
