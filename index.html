@@ -84,12 +84,10 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
   const category = document.getElementById("category").value;
   const exam = document.getElementById("exam").value;
 
-  phone = phone.replace(/\s+/g, "");
-
-  if (!phone.startsWith("+91")) {
-    if (phone.startsWith("91")) phone = "+" + phone;
-    else if (phone.startsWith("0")) phone = "+91" + phone.substring(1);
-    else phone = "+91" + phone;
+  // ✅ FIXED NORMALIZATION
+  phone = phone.replace(/\D/g, "");
+  if (phone.length === 10) {
+    phone = "91" + phone;
   }
 
   const payload = {
