@@ -14,10 +14,12 @@ export default async function handler(req, res) {
 
     let lead = {};
 
-    // ✅ FETCH LATEST LEAD USING CLEAN PHONE
+    // ✅ FIXED: CLEAN + FLEXIBLE MATCH
     try {
+      const cleanPhone = phone.replace(/\D/g, "");
+
       const dbRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/Leads?phone=eq.${encodeURIComponent(phone)}&order=created_at.desc&limit=1`,
+        `${SUPABASE_URL}/rest/v1/Leads?phone=like.*${cleanPhone}&order=created_at.desc&limit=1`,
         {
           headers: {
             apikey: SUPABASE_SERVICE_KEY,
@@ -37,7 +39,6 @@ export default async function handler(req, res) {
 
     let reply = "";
 
-    // ✅ USER RESPONSE HANDLING
     if (incomingMsg === "1") {
       reply = `Great choice 👍
 Our 3-month crash course is built for focused revision and maximum score improvement.
@@ -74,7 +75,7 @@ Reply 1 / 2 / 3`;
     res.setHeader("Content-Type", "text/xml");
     res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 
-    // ✅ FINAL FIXED FUNCTION
+    // ✅ FIXED SAVE
     async function saveInteraction(selectionText) {
       try {
         const resDb = await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
@@ -86,11 +87,11 @@ Reply 1 / 2 / 3`;
             Prefer: "return=representation"
           },
           body: JSON.stringify({
-            phone: phone,                // ✅ CLEAN FORMAT (+91...)
+            phone: phone.replace(/\D/g, ""), // ✅ FIXED
             name: name,
             interest: interest,
-            selection: selectionText,    // ✅ STRING
-            business_id: BUSINESS_ID     // ✅ REQUIRED
+            selection: selectionText,
+            business_id: BUSINESS_ID
           })
         });
 
