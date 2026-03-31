@@ -52,8 +52,8 @@
 
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // ✅ ADDED
-  const BUSINESS_ID = "coaching_1";
+  // ✅ FIXED: replace with YOUR real UUID from Businesses table
+  const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
 
   const examOptions = {
     Engineering: ["JEE","GATE","BITSAT","VITEEE","FE Exam (USA)","GRE Engineering"],
@@ -107,7 +107,6 @@
             stage: stage,
             category: category,
             exam: exam,
-            // ✅ ADDED
             business_id: BUSINESS_ID
           }
         ]);
