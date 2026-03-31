@@ -18,7 +18,6 @@
       <th>Duration</th>
     </tr>
   </thead>
-  <!-- ✅ FIXED: added id -->
   <tbody id="tableBody"></tbody>
 </table>
 
@@ -26,10 +25,14 @@
 const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
 
+// ✅ ADDED (business filter)
+const BUSINESS_ID = "coaching_1";
+
 async function fetchData() {
   try {
     const leadsRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/Leads?order=created_at.desc`,
+      // ✅ UPDATED (filtered by business_id)
+      `${SUPABASE_URL}/rest/v1/Leads?business_id=eq.${BUSINESS_ID}&order=created_at.desc`,
       {
         headers: {
           apikey: SUPABASE_KEY,
@@ -41,7 +44,8 @@ async function fetchData() {
     const leads = await leadsRes.json();
 
     const interRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/interactions`,
+      // ✅ UPDATED (filtered by business_id)
+      `${SUPABASE_URL}/rest/v1/interactions?business_id=eq.${BUSINESS_ID}`,
       {
         headers: {
           apikey: SUPABASE_KEY,
@@ -52,13 +56,11 @@ async function fetchData() {
 
     const interactions = await interRes.json();
 
-    // safety check
     if (!Array.isArray(leads) || !Array.isArray(interactions)) {
       console.error("Invalid data:", leads, interactions);
       return;
     }
 
-    // ✅ FIXED: correct selector
     const table = document.getElementById("tableBody");
 
     if (!table) {

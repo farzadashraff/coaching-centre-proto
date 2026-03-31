@@ -9,6 +9,9 @@ export default async function handler(req, res) {
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
+    // ✅ ADDED
+    const BUSINESS_ID = "coaching_1";
+
     let lead = {};
     try {
       const dbRes = await fetch(
@@ -33,9 +36,7 @@ export default async function handler(req, res) {
 
     if (incomingMsg === "1") {
       reply = `Great choice 👍
-
 Our 3-month crash course is built for focused revision and maximum score improvement.
-
 A mentor will contact you within 10–15 minutes.`;
 
       saveInteraction("3 months");
@@ -43,9 +44,7 @@ A mentor will contact you within 10–15 minutes.`;
 
     else if (incomingMsg === "2") {
       reply = `Excellent choice 👍
-
 Our 6-month program includes structured learning and weekly tests.
-
 A mentor will contact you within 10–15 minutes.`;
 
       saveInteraction("6 months");
@@ -53,9 +52,7 @@ A mentor will contact you within 10–15 minutes.`;
 
     else if (incomingMsg === "3") {
       reply = `Perfect choice 👍
-
 Our 1-year program is a complete preparation system.
-
 A mentor will contact you within 10–15 minutes.`;
 
       saveInteraction("1 year");
@@ -63,21 +60,16 @@ A mentor will contact you within 10–15 minutes.`;
 
     else {
       reply = `Hi ${name}, thanks for your interest in ${interest} 👋
-
 Choose your course duration:
-
 1️⃣ 3 months  
 2️⃣ 6 months  
 3️⃣ 1 year  
-
 Reply 1 / 2 / 3`;
     }
 
-    // ✅ Send response (Twilio expects XML)
     res.setHeader("Content-Type", "text/xml");
     res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 
-    // ✅ Save interaction AFTER response
     async function saveInteraction(selectionText) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
@@ -91,7 +83,9 @@ Reply 1 / 2 / 3`;
             phone,
             name,
             interest,
-            selection: selectionText
+            selection: selectionText,
+            // ✅ ADDED
+            business_id: BUSINESS_ID
           })
         });
       } catch (err) {

@@ -11,7 +11,6 @@
   <input type="text" id="name" placeholder="Name" required /><br><br>
   <input type="text" id="phone" placeholder="Phone" required /><br><br>
 
-  <!-- ✅ STAGE (REPLACED CLASS) -->
   <select id="stage" required>
     <option value="">Select Academic Stage</option>
     <option value="School (Class 9-10)">School (Class 9-10)</option>
@@ -22,7 +21,6 @@
     <option value="Working Professional">Working Professional</option>
   </select><br><br>
 
-  <!-- ✅ CATEGORY -->
   <select id="category" required>
     <option value="">Select Category</option>
     <option value="Engineering">Engineering & Technology</option>
@@ -33,7 +31,6 @@
     <option value="Design">Design & Architecture</option>
   </select><br><br>
 
-  <!-- ✅ EXAM -->
   <select id="exam" required>
     <option value="">Select Exam</option>
   </select><br><br>
@@ -47,7 +44,6 @@
   Message us on WhatsApp
 </button>
 
-<!-- ✅ SUPABASE -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
@@ -56,37 +52,18 @@
 
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // ✅ EXAM DATA
+  // ✅ ADDED
+  const BUSINESS_ID = "coaching_1";
+
   const examOptions = {
-    Engineering: [
-      "JEE", "GATE", "BITSAT", "VITEEE",
-      "FE Exam (USA)", "GRE Engineering"
-    ],
-    Medical: [
-      "NEET UG", "NEET PG", "FMGE", "INI-CET",
-      "USMLE Step 1", "USMLE Step 2", "USMLE Step 3",
-      "PLAB 1", "PLAB 2", "AMC", "MCCQE"
-    ],
-    Abroad: [
-      "IELTS", "TOEFL", "PTE", "Duolingo",
-      "GRE", "GMAT", "SAT", "ACT",
-      "JLPT", "DELF", "Goethe"
-    ],
-    Government: [
-      "UPSC", "SSC", "RRB", "IBPS", "SBI",
-      "CLAT", "NDA", "USPS", "TSA", "ASVAB"
-    ],
-    Professional: [
-      "CFA", "CPA", "ACCA", "CA",
-      "FRM", "CFP", "LSAT", "SQE",
-      "PMP", "AWS", "CISSP"
-    ],
-    Design: [
-      "NATA", "NID DAT", "UCEED", "ARE"
-    ]
+    Engineering: ["JEE","GATE","BITSAT","VITEEE","FE Exam (USA)","GRE Engineering"],
+    Medical: ["NEET UG","NEET PG","FMGE","INI-CET","USMLE Step 1","USMLE Step 2","USMLE Step 3","PLAB 1","PLAB 2","AMC","MCCQE"],
+    Abroad: ["IELTS","TOEFL","PTE","Duolingo","GRE","GMAT","SAT","ACT","JLPT","DELF","Goethe"],
+    Government: ["UPSC","SSC","RRB","IBPS","SBI","CLAT","NDA","USPS","TSA","ASVAB"],
+    Professional: ["CFA","CPA","ACCA","CA","FRM","CFP","LSAT","SQE","PMP","AWS","CISSP"],
+    Design: ["NATA","NID DAT","UCEED","ARE"]
   };
 
-  // ✅ LOAD EXAMS BASED ON CATEGORY
   document.getElementById("category").addEventListener("change", function () {
     const selectedCategory = this.value;
     const examDropdown = document.getElementById("exam");
@@ -103,7 +80,6 @@
     }
   });
 
-  // ✅ FORM SUBMIT
   document.getElementById("leadForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -113,17 +89,12 @@
     const category = document.getElementById("category").value;
     const exam = document.getElementById("exam").value;
 
-    // normalize phone
     phone = phone.replace(/\s+/g, "");
 
     if (!phone.startsWith("+91")) {
-      if (phone.startsWith("91")) {
-        phone = "+" + phone;
-      } else if (phone.startsWith("0")) {
-        phone = "+91" + phone.substring(1);
-      } else {
-        phone = "+91" + phone;
-      }
+      if (phone.startsWith("91")) phone = "+" + phone;
+      else if (phone.startsWith("0")) phone = "+91" + phone.substring(1);
+      else phone = "+91" + phone;
     }
 
     try {
@@ -135,7 +106,9 @@
             phone: phone,
             stage: stage,
             category: category,
-            exam: exam
+            exam: exam,
+            // ✅ ADDED
+            business_id: BUSINESS_ID
           }
         ]);
 
