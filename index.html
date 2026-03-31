@@ -52,7 +52,7 @@
 
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // ✅ FIXED: replace with YOUR real UUID from Businesses table
+  // ✅ YOUR REAL UUID (correct)
   const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
 
   const examOptions = {
@@ -98,7 +98,7 @@
     }
 
     try {
-      const { error } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from("Leads")
         .insert([
           {
@@ -109,9 +109,11 @@
             exam: exam,
             business_id: BUSINESS_ID
           }
-        ]);
+        ])
+        .select(); // ✅ IMPORTANT FIX
 
       if (error) {
+        console.error(error);
         alert("Error: " + error.message);
         return;
       }
