@@ -2,17 +2,19 @@ export default async function handler(req, res) {
   try {
     const rawMsg = req.body?.Body || "";
     const incomingMsg = rawMsg.toString().trim().replace(/\s+/g, "");
-    const phone = (req.body?.From || "").replace("whatsapp:", "");
+    const phone = (req.body?.From || "").replace("whatsapp:", "").trim();
 
     console.log("MSG:", incomingMsg);
+    console.log("PHONE:", phone);
 
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-    // ✅ CORRECT BUSINESS ID
     const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
 
     let lead = {};
+
+    // ✅ FETCH LATEST LEAD USING CLEAN PHONE
     try {
       const dbRes = await fetch(
         `${SUPABASE_URL}/rest/v1/Leads?phone=eq.${encodeURIComponent(phone)}&order=created_at.desc&limit=1`,
@@ -23,17 +25,19 @@ export default async function handler(req, res) {
           }
         }
       );
+
       const data = await dbRes.json();
       lead = data?.[0] || {};
     } catch (e) {
-      console.log("Lead fetch error");
+      console.log("Lead fetch error", e);
     }
 
-    const name = lead.name || "";
-    const interest = lead.interest || "our coaching";
+    const name = lead.name || "there";
+    const interest = lead.exam || "our coaching";
 
     let reply = "";
 
+    // ✅ USER RESPONSE HANDLING
     if (incomingMsg === "1") {
       reply = `Great choice 👍
 Our 3-month crash course is built for focused revision and maximum score improvement.
@@ -70,26 +74,29 @@ Reply 1 / 2 / 3`;
     res.setHeader("Content-Type", "text/xml");
     res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 
-    // ✅ FIXED FUNCTION (CORRECTLY PLACED)
+    // ✅ FINAL FIXED FUNCTION
     async function saveInteraction(selectionText) {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
+        const resDb = await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
           headers: {
             apikey: SUPABASE_SERVICE_KEY,
             Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Prefer: "return=representation"
           },
           body: JSON.stringify({
-            phone: phone, // already cleaned above
-            name,
-            interest,
-            selection: selectionText, // now string like "1 year"
-            business_id: BUSINESS_ID // now correctly saved
+            phone: phone,                // ✅ CLEAN FORMAT (+91...)
+            name: name,
+            interest: interest,
+            selection: selectionText,    // ✅ STRING
+            business_id: BUSINESS_ID     // ✅ REQUIRED
           })
         });
 
-        const data = await res.text();
+        const data = await resDb.text();
+
+        console.log("SAVE STATUS:", resDb.status);
         console.log("SAVE RESPONSE:", data);
 
       } catch (err) {
