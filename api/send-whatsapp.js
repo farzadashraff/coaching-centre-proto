@@ -12,8 +12,6 @@ export default async function handler(req, res) {
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-    const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
-
     let lead = {};
 
     try {
@@ -29,9 +27,23 @@ export default async function handler(req, res) {
 
       const data = await dbRes.json();
       lead = data?.[0] || {};
+
+      // ✅ ADDED HERE (CORRECT PLACE)
+      if (!lead.business_id) {
+        console.log("No lead found — cannot assign business");
+        
+        res.setHeader("Content-Type", "text/xml");
+        res.status(200).send(`<Response><Message>Please submit the form first.</Message></Response>`);
+        
+        return;
+      }
+
     } catch (e) {
       console.log("Lead fetch error", e);
     }
+
+    // ✅ MOVED HERE (AFTER lead exists)
+    const BUSINESS_ID = lead.business_id;
 
     const name = lead.name || "there";
     const interest = lead.exam || "our coaching";
@@ -85,7 +97,7 @@ Reply 1 / 2 / 3`;
             Prefer: "return=representation"
           },
           body: JSON.stringify({
-            phone: cleanPhone, // ✅ FIXED
+            phone: cleanPhone,
             name: name,
             interest: interest,
             selection: selectionText,

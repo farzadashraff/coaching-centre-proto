@@ -118,7 +118,7 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
   const message = `Hi, I am ${name}, currently ${stage}. I am interested in ${exam} under ${category}.`;
   const encodedMessage = encodeURIComponent(message);
 
-  const whatsappURL = `https://api.whatsapp.com/send?phone=14155238886&text=${encodedMessage}`;
+  const whatsappURL = `https://api.whatsapp.com/send?phone=14155238886&text=${encodedMessage}&business_id=${BUSINESS_ID}`;
 
   const btn = document.getElementById("whatsappBtn");
   btn.style.display = "block";
