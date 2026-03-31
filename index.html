@@ -47,96 +47,88 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
-  const supabaseUrl = "https://xsdalnxweznnjzogyqaa.supabase.co";
-  const supabaseKey = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
+const supabaseClient = window.supabase.createClient(
+  "https://xsdalnxweznnjzogyqaa.supabase.co",
+  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
+);
 
-  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
 
-  // ✅ YOUR REAL UUID (correct)
-  const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
+const examOptions = {
+  Engineering: ["JEE","GATE","BITSAT","VITEEE"],
+  Medical: ["NEET UG","NEET PG","FMGE"],
+  Abroad: ["IELTS","TOEFL","PTE"],
+  Government: ["UPSC","SSC"],
+  Professional: ["CFA","ACCA","AWS"],
+  Design: ["NATA","UCEED"]
+};
 
-  const examOptions = {
-    Engineering: ["JEE","GATE","BITSAT","VITEEE","FE Exam (USA)","GRE Engineering"],
-    Medical: ["NEET UG","NEET PG","FMGE","INI-CET","USMLE Step 1","USMLE Step 2","USMLE Step 3","PLAB 1","PLAB 2","AMC","MCCQE"],
-    Abroad: ["IELTS","TOEFL","PTE","Duolingo","GRE","GMAT","SAT","ACT","JLPT","DELF","Goethe"],
-    Government: ["UPSC","SSC","RRB","IBPS","SBI","CLAT","NDA","USPS","TSA","ASVAB"],
-    Professional: ["CFA","CPA","ACCA","CA","FRM","CFP","LSAT","SQE","PMP","AWS","CISSP"],
-    Design: ["NATA","NID DAT","UCEED","ARE"]
+document.getElementById("category").addEventListener("change", function () {
+  const examDropdown = document.getElementById("exam");
+  examDropdown.innerHTML = '<option value="">Select Exam</option>';
+
+  (examOptions[this.value] || []).forEach(exam => {
+    const option = document.createElement("option");
+    option.value = exam;
+    option.textContent = exam;
+    examDropdown.appendChild(option);
+  });
+});
+
+document.getElementById("leadForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  const stage = document.getElementById("stage").value;
+  const category = document.getElementById("category").value;
+  const exam = document.getElementById("exam").value;
+
+  phone = phone.replace(/\s+/g, "");
+
+  if (!phone.startsWith("+91")) {
+    if (phone.startsWith("91")) phone = "+" + phone;
+    else if (phone.startsWith("0")) phone = "+91" + phone.substring(1);
+    else phone = "+91" + phone;
+  }
+
+  const payload = {
+    name,
+    phone,
+    stage,
+    category,
+    exam,
+    business_id: BUSINESS_ID
   };
 
-  document.getElementById("category").addEventListener("change", function () {
-    const selectedCategory = this.value;
-    const examDropdown = document.getElementById("exam");
+  console.log("SENDING:", payload);
 
-    examDropdown.innerHTML = '<option value="">Select Exam</option>';
+  const { data, error } = await supabaseClient
+    .from("Leads")
+    .insert([payload])
+    .select();
 
-    if (examOptions[selectedCategory]) {
-      examOptions[selectedCategory].forEach(exam => {
-        const option = document.createElement("option");
-        option.value = exam;
-        option.textContent = exam;
-        examDropdown.appendChild(option);
-      });
-    }
-  });
+  console.log("RESPONSE:", { data, error });
 
-  document.getElementById("leadForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
 
-    const name = document.getElementById("name").value.trim();
-    let phone = document.getElementById("phone").value.trim();
-    const stage = document.getElementById("stage").value;
-    const category = document.getElementById("category").value;
-    const exam = document.getElementById("exam").value;
+  alert("Form submitted successfully");
 
-    phone = phone.replace(/\s+/g, "");
+  const message = `Hi, I am ${name}, currently ${stage}. I am interested in ${exam} under ${category}.`;
+  const encodedMessage = encodeURIComponent(message);
 
-    if (!phone.startsWith("+91")) {
-      if (phone.startsWith("91")) phone = "+" + phone;
-      else if (phone.startsWith("0")) phone = "+91" + phone.substring(1);
-      else phone = "+91" + phone;
-    }
+  const whatsappURL = `https://api.whatsapp.com/send?phone=14155238886&text=${encodedMessage}`;
 
-    try {
-      const { data, error } = await supabaseClient
-        .from("Leads")
-        .insert([
-          {
-            name: name,
-            phone: phone,
-            stage: stage,
-            category: category,
-            exam: exam,
-            business_id: BUSINESS_ID
-          }
-        ])
-        .select(); // ✅ IMPORTANT FIX
+  const btn = document.getElementById("whatsappBtn");
+  btn.style.display = "block";
 
-      if (error) {
-        console.error(error);
-        alert("Error: " + error.message);
-        return;
-      }
-
-      alert("Form submitted successfully");
-
-      const message = `Hi, I am ${name}, currently ${stage}. I am interested in ${exam} under ${category}.`;
-      const encodedMessage = encodeURIComponent(message);
-
-      const whatsappURL = `https://api.whatsapp.com/send?phone=14155238886&text=${encodedMessage}`;
-
-      const btn = document.getElementById("whatsappBtn");
-      btn.style.display = "block";
-
-      btn.onclick = () => {
-        window.open(whatsappURL, "_blank");
-      };
-
-    } catch (err) {
-      alert("Unexpected error");
-      console.error(err);
-    }
-  });
+  btn.onclick = () => {
+    window.open(whatsappURL, "_blank");
+  };
+});
 </script>
 
 </body>
