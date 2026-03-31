@@ -1,10 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CRM Dashboard</title>
+</head>
+<body>
+
+<h2>Leads Dashboard</h2>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Stage</th>
+      <th>Category</th>
+      <th>Exam</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+  <!-- ✅ FIXED: added id -->
+  <tbody id="tableBody"></tbody>
+</table>
+
 <script>
 const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
 
 async function fetchData() {
   try {
-    // ✅ FIX 1: Correct table name (Leads)
     const leadsRes = await fetch(
       `${SUPABASE_URL}/rest/v1/Leads?order=created_at.desc`,
       {
@@ -16,9 +39,7 @@ async function fetchData() {
     );
 
     const leads = await leadsRes.json();
-    console.log("Leads:", leads);
 
-    // ✅ FIX 2: Correct interactions fetch
     const interRes = await fetch(
       `${SUPABASE_URL}/rest/v1/interactions`,
       {
@@ -30,43 +51,43 @@ async function fetchData() {
     );
 
     const interactions = await interRes.json();
-    console.log("Interactions:", interactions);
 
-    // ✅ SAFETY CHECK (prevents crash)
-    if (!Array.isArray(leads)) {
-      console.error("Leads not array:", leads);
+    // safety check
+    if (!Array.isArray(leads) || !Array.isArray(interactions)) {
+      console.error("Invalid data:", leads, interactions);
       return;
     }
 
-    if (!Array.isArray(interactions)) {
-      console.error("Interactions not array:", interactions);
+    // ✅ FIXED: correct selector
+    const table = document.getElementById("tableBody");
+
+    if (!table) {
+      console.error("tableBody not found");
       return;
     }
 
-    const table = document.querySelector("#leadsTable tbody");
     table.innerHTML = "";
 
     leads.forEach(lead => {
 
-      // ✅ FIX 3: normalize phone match
-      const cleanLeadPhone = (lead.phone || "").replace("whatsapp:", "");
+      const cleanLeadPhone = (lead.phone || "").replace("whatsapp:", "").trim();
 
       const interaction = interactions
-        .filter(i => (i.phone || "").replace("whatsapp:", "") === cleanLeadPhone)
-        .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+        .filter(i => (i.phone || "").replace("whatsapp:", "").trim() === cleanLeadPhone)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
-      const row = `
-        <tr>
-          <td>${lead.name || ""}</td>
-          <td>${lead.phone}</td>
-          <td>${lead.stage || ""}</td>
-          <td>${lead.category || ""}</td>
-          <td>${lead.exam || ""}</td>
-          <td>${interaction ? interaction.selection : "Not Selected"}</td>
-        </tr>
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${lead.name || ""}</td>
+        <td>${lead.phone || ""}</td>
+        <td>${lead.stage || ""}</td>
+        <td>${lead.category || ""}</td>
+        <td>${lead.exam || ""}</td>
+        <td>${interaction ? interaction.selection : "Not Selected"}</td>
       `;
 
-      table.innerHTML += row;
+      table.appendChild(row);
     });
 
   } catch (err) {
@@ -76,3 +97,6 @@ async function fetchData() {
 
 fetchData();
 </script>
+
+</body>
+</html>
