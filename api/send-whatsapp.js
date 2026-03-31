@@ -9,8 +9,8 @@ export default async function handler(req, res) {
     const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-    // ✅ ADDED
-    const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";;
+    // ✅ CORRECT BUSINESS ID
+    const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
 
     let lead = {};
     try {
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 Our 3-month crash course is built for focused revision and maximum score improvement.
 A mentor will contact you within 10–15 minutes.`;
 
-      saveInteraction("3 months");
+      await saveInteraction("3 months");
     }
 
     else if (incomingMsg === "2") {
@@ -47,7 +47,7 @@ A mentor will contact you within 10–15 minutes.`;
 Our 6-month program includes structured learning and weekly tests.
 A mentor will contact you within 10–15 minutes.`;
 
-      saveInteraction("6 months");
+      await saveInteraction("6 months");
     }
 
     else if (incomingMsg === "3") {
@@ -55,7 +55,7 @@ A mentor will contact you within 10–15 minutes.`;
 Our 1-year program is a complete preparation system.
 A mentor will contact you within 10–15 minutes.`;
 
-      saveInteraction("1 year");
+      await saveInteraction("1 year");
     }
 
     else {
@@ -70,9 +70,10 @@ Reply 1 / 2 / 3`;
     res.setHeader("Content-Type", "text/xml");
     res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 
+    // ✅ FIXED FUNCTION (CORRECTLY PLACED)
     async function saveInteraction(selectionText) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
           headers: {
             apikey: SUPABASE_SERVICE_KEY,
@@ -80,16 +81,19 @@ Reply 1 / 2 / 3`;
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            phone,
+            phone: phone, // already cleaned above
             name,
             interest,
-            selection: selectionText,
-            // ✅ ADDED
-            business_id: BUSINESS_ID
+            selection: selectionText, // now string like "1 year"
+            business_id: BUSINESS_ID // now correctly saved
           })
         });
+
+        const data = await res.text();
+        console.log("SAVE RESPONSE:", data);
+
       } catch (err) {
-        console.log("DB FAILED BUT BOT SAFE");
+        console.log("DB FAILED", err);
       }
     }
 
