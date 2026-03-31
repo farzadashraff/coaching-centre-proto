@@ -54,6 +54,9 @@ const supabaseClient = window.supabase.createClient(
 
 const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
 
+const TWILIO_NUMBER = "+14155238886";
+const JOIN_CODE = "join rays-doll";
+
 const examOptions = {
   Engineering: ["JEE","GATE","BITSAT","VITEEE"],
   Medical: ["NEET UG","NEET PG","FMGE"],
@@ -84,7 +87,7 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
   const category = document.getElementById("category").value;
   const exam = document.getElementById("exam").value;
 
-  // ✅ FIXED NORMALIZATION
+  // ✅ NORMALIZATION (CORRECT)
   phone = phone.replace(/\D/g, "");
   if (phone.length === 10) {
     phone = "91" + phone;
@@ -115,16 +118,33 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
 
   alert("Form submitted successfully");
 
-  const message = `Hi, I am ${name}, currently ${stage}. I am interested in ${exam} under ${category}.`;
-  const encodedMessage = encodeURIComponent(message);
-
-  const whatsappURL = `https://api.whatsapp.com/send?phone=14155238886&text=${encodedMessage}&business_id=${BUSINESS_ID}`;
-
+  // ✅ SHOW BUTTON (FIXED FLOW)
   const btn = document.getElementById("whatsappBtn");
   btn.style.display = "block";
 
-  btn.onclick = () => {
-    window.open(whatsappURL, "_blank");
+  btn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(JOIN_CODE);
+
+      alert(
+`Open WhatsApp and follow steps:
+
+1. Send "${JOIN_CODE}" to ${TWILIO_NUMBER} (only first time)
+2. Wait for confirmation
+3. Then send "Hi"
+
+(Code copied to clipboard)`
+      );
+
+    } catch {
+      alert(
+`Open WhatsApp and send:
+
+"${JOIN_CODE}" to ${TWILIO_NUMBER}
+
+Then send "Hi"`
+      );
+    }
   };
 });
 </script>

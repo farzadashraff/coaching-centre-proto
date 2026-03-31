@@ -4,7 +4,12 @@ export default async function handler(req, res) {
     const incomingMsg = rawMsg.toString().trim().replace(/\s+/g, "");
     const phone = (req.body?.From || "").replace("whatsapp:", "").trim();
 
-    const cleanPhone = phone.replace(/\D/g, "");
+    // ✅ FIX 1: STRONG NORMALIZATION
+    let cleanPhone = phone.replace(/\D/g, "");
+
+    if (cleanPhone.length === 10) {
+      cleanPhone = "91" + cleanPhone;
+    }
 
     console.log("MSG:", incomingMsg);
     console.log("PHONE:", cleanPhone);
@@ -15,8 +20,9 @@ export default async function handler(req, res) {
     let lead = {};
 
     try {
+      // ✅ FIX 2: FLEXIBLE MATCH (CRITICAL)
       const dbRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/Leads?phone=eq.${cleanPhone}&order=created_at.desc&limit=1`,
+        `${SUPABASE_URL}/rest/v1/Leads?phone=like.*${cleanPhone}&order=created_at.desc&limit=1`,
         {
           headers: {
             apikey: SUPABASE_SERVICE_KEY,
@@ -28,7 +34,7 @@ export default async function handler(req, res) {
       const data = await dbRes.json();
       lead = data?.[0] || {};
 
-      // ✅ ADDED HERE (CORRECT PLACE)
+      // ✅ KEEP YOUR GUARD (CORRECT)
       if (!lead.business_id) {
         console.log("No lead found — cannot assign business");
         
@@ -42,7 +48,7 @@ export default async function handler(req, res) {
       console.log("Lead fetch error", e);
     }
 
-    // ✅ MOVED HERE (AFTER lead exists)
+    // ✅ CORRECT POSITION
     const BUSINESS_ID = lead.business_id;
 
     const name = lead.name || "there";
