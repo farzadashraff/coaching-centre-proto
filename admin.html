@@ -21,17 +21,52 @@
   <tbody id="tableBody"></tbody>
 </table>
 
+<!-- ✅ ADDED (Supabase script) -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
 <script>
 const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
 
-// ✅ ADDED (business filter)
-const BUSINESS_ID = "coaching_1";
+// ✅ ADDED (Supabase client)
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 async function fetchData() {
   try {
+
+    // ✅ ADDED (get logged-in user)
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("Not logged in");
+      window.location.href = "/login.html";
+      return;
+    }
+
+    // ✅ ADDED (get business dynamically)
+    const bizRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/Businesses?user_id=eq.${user.id}`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      }
+    );
+
+    const bizData = await bizRes.json();
+
+    if (!bizData.length) {
+      alert("No business linked");
+      return;
+    }
+
+    const BUSINESS_ID = bizData[0].id;
+
     const leadsRes = await fetch(
-      // ✅ UPDATED (filtered by business_id)
       `${SUPABASE_URL}/rest/v1/Leads?business_id=eq.${BUSINESS_ID}&order=created_at.desc`,
       {
         headers: {
@@ -44,7 +79,6 @@ async function fetchData() {
     const leads = await leadsRes.json();
 
     const interRes = await fetch(
-      // ✅ UPDATED (filtered by business_id)
       `${SUPABASE_URL}/rest/v1/interactions?business_id=eq.${BUSINESS_ID}`,
       {
         headers: {
