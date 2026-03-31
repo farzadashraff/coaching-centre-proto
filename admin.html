@@ -1,63 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>CRM Dashboard</title>
-</head>
-<body>
-
-<h2>Leads Dashboard</h2>
-
-<table border="1" id="leadsTable">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Phone</th>
-      <th>Stage</th>
-      <th>Category</th>
-      <th>Exam</th>
-      <th>Duration</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
 <script>
 const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
 
 async function fetchData() {
   try {
+    // ✅ FIX 1: Correct table name (Leads)
     const leadsRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/leads?order=created_at.desc`,
+      `${SUPABASE_URL}/rest/v1/Leads?order=created_at.desc`,
       {
         headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
         }
       }
     );
 
     const leads = await leadsRes.json();
+    console.log("Leads:", leads);
 
+    // ✅ FIX 2: Correct interactions fetch
     const interRes = await fetch(
       `${SUPABASE_URL}/rest/v1/interactions`,
       {
         headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
         }
       }
     );
 
     const interactions = await interRes.json();
+    console.log("Interactions:", interactions);
+
+    // ✅ SAFETY CHECK (prevents crash)
+    if (!Array.isArray(leads)) {
+      console.error("Leads not array:", leads);
+      return;
+    }
+
+    if (!Array.isArray(interactions)) {
+      console.error("Interactions not array:", interactions);
+      return;
+    }
 
     const table = document.querySelector("#leadsTable tbody");
     table.innerHTML = "";
 
     leads.forEach(lead => {
 
+      // ✅ FIX 3: normalize phone match
+      const cleanLeadPhone = (lead.phone || "").replace("whatsapp:", "");
+
       const interaction = interactions
-        .filter(i => i.phone === lead.phone)
+        .filter(i => (i.phone || "").replace("whatsapp:", "") === cleanLeadPhone)
         .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
       const row = `
@@ -81,6 +76,3 @@ async function fetchData() {
 
 fetchData();
 </script>
-
-</body>
-</html>
