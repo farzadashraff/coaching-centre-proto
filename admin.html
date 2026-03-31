@@ -85,12 +85,14 @@ async function fetchData() {
     const table = document.getElementById("tableBody");
     table.innerHTML = "";
 
+    // ✅ FIX: phone cleaner function
+    const clean = p => (p || "").replace(/\D/g, "");
+
     leads.forEach(lead => {
 
-      const cleanLeadPhone = (lead.phone || "").replace("whatsapp:", "").trim();
-
+      // ✅ FIX: find matching interaction
       const interaction = interactions
-        .filter(i => (i.phone || "").replace("whatsapp:", "").trim() === cleanLeadPhone)
+        .filter(i => clean(i.phone) === clean(lead.phone))
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
       const row = document.createElement("tr");
