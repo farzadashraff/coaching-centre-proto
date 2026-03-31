@@ -28,8 +28,8 @@
 const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
 
-// ✅ ADDED (Supabase client)
-const supabase = window.supabase.createClient(
+// ✅ FIXED (renamed variable)
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -37,8 +37,8 @@ const supabase = window.supabase.createClient(
 async function fetchData() {
   try {
 
-    // ✅ ADDED (get logged-in user)
-    const { data: { user } } = await supabase.auth.getUser();
+    // ✅ FIXED (use supabaseClient)
+    const { data: { user } } = await supabaseClient.auth.getUser();
 
     if (!user) {
       alert("Not logged in");
@@ -46,7 +46,6 @@ async function fetchData() {
       return;
     }
 
-    // ✅ ADDED (get business dynamically)
     const bizRes = await fetch(
       `${SUPABASE_URL}/rest/v1/Businesses?user_id=eq.${user.id}`,
       {
