@@ -1,18 +1,8 @@
-exports.handler = async (event) => {
+export default async function handler(req, res) {
   try {
-    let bodyString = "";
-
-    if (event.isBase64Encoded) {
-      bodyString = Buffer.from(event.body, "base64").toString("utf-8");
-    } else {
-      bodyString = event.body || "";
-    }
-
-    const params = new URLSearchParams(bodyString);
-
-    const rawMsg = params.get("Body") || "";
+    const rawMsg = req.body?.Body || "";
     const incomingMsg = rawMsg.toString().trim().replace(/\s+/g, "");
-    const phone = (params.get("From") || "").replace("whatsapp:", "");
+    const phone = (req.body?.From || "").replace("whatsapp:", "");
 
     console.log("MSG:", incomingMsg);
 
@@ -21,16 +11,16 @@ exports.handler = async (event) => {
 
     let lead = {};
     try {
-      const res = await fetch(
+      const dbRes = await fetch(
         `${SUPABASE_URL}/rest/v1/Leads?phone=eq.${encodeURIComponent(phone)}&order=created_at.desc&limit=1`,
         {
           headers: {
-            "apikey": SUPABASE_SERVICE_KEY,
-            "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`
+            apikey: SUPABASE_SERVICE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`
           }
         }
       );
-      const data = await res.json();
+      const data = await dbRes.json();
       lead = data?.[0] || {};
     } catch (e) {
       console.log("Lead fetch error");
@@ -41,7 +31,6 @@ exports.handler = async (event) => {
 
     let reply = "";
 
-    // ===== MAIN LOGIC =====
     if (incomingMsg === "1") {
       reply = `Great choice 👍
 
@@ -84,23 +73,18 @@ Choose your course duration:
 Reply 1 / 2 / 3`;
     }
 
-    // ===== RESPONSE FIRST =====
-    const response = {
-      statusCode: 200,
-      headers: { "Content-Type": "text/xml" },
-      body: `<Response><Message>${reply}</Message></Response>`
-    };
+    // ✅ Send response (Twilio expects XML)
+    res.setHeader("Content-Type", "text/xml");
+    res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 
-    return response;
-
-    // ===== SAVE AFTER RESPONSE (SAFE) =====
+    // ✅ Save interaction AFTER response
     async function saveInteraction(selectionText) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/interactions`, {
           method: "POST",
           headers: {
-            "apikey": SUPABASE_SERVICE_KEY,
-            "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+            apikey: SUPABASE_SERVICE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
@@ -118,10 +102,7 @@ Reply 1 / 2 / 3`;
   } catch (err) {
     console.error("ERROR:", err);
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "text/xml" },
-      body: `<Response><Message>Error</Message></Response>`
-    };
+    res.setHeader("Content-Type", "text/xml");
+    res.status(200).send(`<Response><Message>Error</Message></Response>`);
   }
-};
+}
