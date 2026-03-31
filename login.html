@@ -15,7 +15,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
@@ -24,7 +24,7 @@ document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
