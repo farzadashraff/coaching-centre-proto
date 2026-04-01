@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup</title>
+</head>
+<body>
+
+<h2>Create Account</h2>
+
+<input type="email" id="email" placeholder="Email"><br><br>
+<input type="password" id="password" placeholder="Password"><br><br>
+
+<button id="signupBtn">Sign Up</button>
+
+<p id="msg"></p>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase.createClient(
+  "https://xsdalnxweznnjzogyqaa.supabase.co",
+  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
+);
+
+document.getElementById("signupBtn").onclick = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const msg = document.getElementById("msg");
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    msg.innerText = "Error: " + error.message;
+    return;
+  }
+
+  msg.innerText = "Signup successful! Redirecting...";
+
+  // small delay for UX
+  setTimeout(() => {
+    window.location.href = "/admin.html";
+  }, 1500);
+};
+</script>
+
+</body>
+</html>
