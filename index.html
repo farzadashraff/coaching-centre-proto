@@ -52,8 +52,6 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-const BUSINESS_ID = "b1947d29-7a01-4d50-a3e4-66fd1503d67d";
-
 const TWILIO_NUMBER = "+14155238886";
 const JOIN_CODE = "join rays-doll";
 
@@ -93,6 +91,27 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
     phone = "91" + phone;
   }
 
+  // ✅ NEW: GET USER + BUSINESS (MOVED HERE)
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Not logged in");
+    return;
+  }
+
+  const { data: businesses, error: bizError } = await supabaseClient
+    .from("Businesses")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (bizError || !businesses || businesses.length === 0) {
+    alert("No business found for user");
+    console.error(bizError);
+    return;
+  }
+
+  const BUSINESS_ID = businesses[0].id;
+
   const payload = {
     name,
     phone,
@@ -118,7 +137,6 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
 
   alert("Form submitted successfully");
 
-  // ✅ SHOW BUTTON (FIXED FLOW)
   const btn = document.getElementById("whatsappBtn");
   btn.style.display = "block";
 
