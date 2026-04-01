@@ -15,6 +15,7 @@
       <th>Stage</th>
       <th>Category</th>
       <th>Exam</th>
+      <th>Status</th>
       <th>Duration</th>
     </tr>
   </thead>
@@ -103,6 +104,17 @@ async function fetchData() {
         <td>${lead.stage || ""}</td>
         <td>${lead.category || ""}</td>
         <td>${lead.exam || ""}</td>
+
+        <td>
+          <select onchange="updateStatus('${lead.id}', this.value)">
+            <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
+            <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
+            <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
+            <option ${lead.status === 'Converted' ? 'selected' : ''}>Converted</option>
+            <option ${lead.status === 'Dropped' ? 'selected' : ''}>Dropped</option>
+          </select>
+        </td>
+
         <td>${interaction ? interaction.selection : "Not Selected"}</td>
       `;
 
@@ -111,6 +123,21 @@ async function fetchData() {
 
   } catch (err) {
     console.error("ERROR:", err);
+  }
+}
+
+// ✅ NEW FUNCTION ADDED
+async function updateStatus(leadId, newStatus) {
+  const { error } = await supabaseClient
+    .from("Leads")
+    .update({ status: newStatus })
+    .eq("id", leadId);
+
+  if (error) {
+    alert("Failed to update status");
+    console.error(error);
+  } else {
+    console.log("Status updated");
   }
 }
 
