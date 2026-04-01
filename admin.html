@@ -106,7 +106,7 @@ async function fetchData() {
         <td>${lead.exam || ""}</td>
 
         <td>
-          <select onchange="updateStatus('${lead.id}', this.value)">
+          <select onchange="updateStatus('${lead.ID}', this.value)">
             <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
             <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
             <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
@@ -131,7 +131,7 @@ async function updateStatus(leadId, newStatus) {
   const { error } = await supabaseClient
     .from("Leads")
     .update({ status: newStatus })
-    .eq("id", leadId);
+    .eq("ID", leadId);
 
   if (error) {
     alert("Failed to update status");
