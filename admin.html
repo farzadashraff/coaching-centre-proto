@@ -5,7 +5,6 @@
 </head>
 <body>
 
-<!-- ✅ NEW: USER INFO + LOGOUT -->
 <div style="margin-bottom: 10px;">
   <strong id="userInfo">Checking user...</strong>
   <button onclick="logout()" style="margin-left: 10px;">Logout</button>
@@ -41,7 +40,6 @@ const supabaseClient = window.supabase.createClient(
 
 async function fetchData() {
   try {
-    // ✅ check login
     const { data: { user } } = await supabaseClient.auth.getUser();
 
     if (!user) {
@@ -50,18 +48,12 @@ async function fetchData() {
       return;
     }
 
-    // ✅ SHOW LOGGED USER
     document.getElementById("userInfo").innerText = "Logged in as: " + user.email;
 
-    console.log("USER:", user);
-
-    // ✅ get business
     const { data: businesses, error: bizError } = await supabaseClient
       .from("Businesses")
       .select("*")
       .eq("user_id", user.id);
-
-    console.log("BUSINESSES:", businesses, bizError);
 
     if (bizError || !businesses || businesses.length === 0) {
       alert("No business linked");
@@ -70,22 +62,16 @@ async function fetchData() {
 
     const BUSINESS_ID = businesses[0].id;
 
-    // ✅ get leads
     const { data: leads, error: leadsError } = await supabaseClient
       .from("Leads")
       .select("*")
       .eq("business_id", BUSINESS_ID)
       .order("created_at", { ascending: false });
 
-    console.log("LEADS:", leads, leadsError);
-
-    // ✅ get interactions
     const { data: interactions, error: interError } = await supabaseClient
       .from("interactions")
       .select("*")
       .eq("business_id", BUSINESS_ID);
-
-    console.log("INTERACTIONS:", interactions, interError);
 
     if (leadsError || interError) {
       console.error("Fetch error:", leadsError, interError);
@@ -95,12 +81,10 @@ async function fetchData() {
     const table = document.getElementById("tableBody");
     table.innerHTML = "";
 
-    // ✅ FIX: phone cleaner function
     const clean = p => (p || "").replace(/\D/g, "");
 
     leads.forEach(lead => {
 
-      // ✅ FIX: find matching interaction
       const interaction = interactions
         .filter(i => clean(i.phone) === clean(lead.phone))
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
@@ -115,8 +99,7 @@ async function fetchData() {
         <td>${lead.exam || ""}</td>
 
         <td>
-          <!-- ✅ FIXED id -->
-          <select onchange="updateStatus('${lead.id}', this.value)">
+          <select onchange="updateStatus('${lead.ID}', this.value)">
             <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
             <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
             <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
@@ -136,22 +119,24 @@ async function fetchData() {
   }
 }
 
-// ✅ FIXED update query
 async function updateStatus(leadId, newStatus) {
-  const { error } = await supabaseClient
+  console.log("UPDATING:", leadId, newStatus);
+
+  const { data, error } = await supabaseClient
     .from("Leads")
     .update({ status: newStatus })
-    .eq("id", leadId);
+    .eq("ID", leadId)   // ✅ CRITICAL FIX
+
+  console.log("UPDATE RESPONSE:", { data, error });
 
   if (error) {
     alert("Failed to update status");
     console.error(error);
   } else {
-    console.log("Status updated");
+    console.log("Status updated successfully");
   }
 }
 
-// ✅ NEW: LOGOUT FUNCTION
 async function logout() {
   await supabaseClient.auth.signOut();
   window.location.href = "/login.html";
