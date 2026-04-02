@@ -20,11 +20,6 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-// ✅ FORCE CLEAN SESSION BEFORE LOGIN
-window.onload = async () => {
-  await supabaseClient.auth.signOut();
-};
-
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
