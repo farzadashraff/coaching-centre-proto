@@ -59,6 +59,12 @@ async function fetchData() {
       return;
     }
 
+    if (!businesses || businesses.length !== 1) {
+        console.error("Invalid business mapping", businesses);
+        alert("Business error");
+        return;
+    }
+
     const BUSINESS_ID = businesses[0].id;
 
     // ✅ get leads
@@ -106,7 +112,7 @@ async function fetchData() {
         <td>${lead.exam || ""}</td>
 
         <td>
-          <select onchange="updateStatus('${lead.ID}', this.value)">
+          <select onchange="updateStatus('${lead.id}', this.value)">
             <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
             <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
             <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
@@ -131,7 +137,7 @@ async function updateStatus(leadId, newStatus) {
   const { error } = await supabaseClient
     .from("Leads")
     .update({ status: newStatus })
-    .eq("ID", leadId);
+    .eq("id", leadId);
 
   if (error) {
     alert("Failed to update status");

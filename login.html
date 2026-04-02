@@ -15,14 +15,12 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseClient = window.supabase.createClient(
-  "https://xsdalnxweznnjzogyqaa.supabase.co",
-  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
-);
-
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+
+  // ✅ ADD THIS LINE (CRITICAL FIX)
+  await supabaseClient.auth.signOut();
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
@@ -34,7 +32,6 @@ document.getElementById("loginBtn").onclick = async () => {
     return;
   }
 
-  // redirect after login
   window.location.href = "/admin.html";
 };
 </script>
