@@ -12,6 +12,12 @@
 
 <button id="loginBtn">Login</button>
 
+<br><br>
+
+<!-- ✅ ADDED SIGNUP OPTION -->
+<p>Don't have an account?</p>
+<button id="goSignup">Sign Up</button>
+
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
@@ -20,6 +26,7 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
+// ✅ LOGIN
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -35,6 +42,11 @@ document.getElementById("loginBtn").onclick = async () => {
   }
 
   window.location.href = "/admin.html";
+};
+
+// ✅ SIGNUP NAVIGATION (THIS WAS MISSING)
+document.getElementById("goSignup").onclick = () => {
+  window.location.href = "/signup.html";
 };
 </script>
 

@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Signup</title>
 </head>
 <body>
 
-<h2>Login</h2>
+<h2>Create Account</h2>
 
 <input type="email" id="email" placeholder="Email"><br><br>
 <input type="password" id="password" placeholder="Password"><br><br>
 
-<button id="loginBtn">Login</button>
+<button id="signupBtn">Sign Up</button>
 
-<br><br>
-
-<!-- ✅ NEW: SIGNUP LINK -->
-<button onclick="window.location.href='/signup.html'">Create Account</button>
+<p id="msg"></p>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
@@ -25,21 +22,28 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-document.getElementById("loginBtn").onclick = async () => {
+document.getElementById("signupBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
+  const msg = document.getElementById("msg");
+
+  const { data, error } = await supabaseClient.auth.signUp({
     email,
     password
   });
 
   if (error) {
-    alert(error.message);
+    msg.innerText = "Error: " + error.message;
     return;
   }
 
-  window.location.href = "/admin.html";
+  msg.innerText = "Signup successful! Redirecting...";
+
+  // small delay for UX
+  setTimeout(() => {
+    window.location.href = "/admin.html";
+  }, 1500);
 };
 </script>
 
