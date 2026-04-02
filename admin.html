@@ -5,6 +5,12 @@
 </head>
 <body>
 
+<!-- ✅ NEW: USER INFO + LOGOUT -->
+<div style="margin-bottom: 10px;">
+  <strong id="userInfo">Checking user...</strong>
+  <button onclick="logout()" style="margin-left: 10px;">Logout</button>
+</div>
+
 <h2>Leads Dashboard</h2>
 
 <table border="1">
@@ -44,6 +50,9 @@ async function fetchData() {
       return;
     }
 
+    // ✅ SHOW LOGGED USER
+    document.getElementById("userInfo").innerText = "Logged in as: " + user.email;
+
     console.log("USER:", user);
 
     // ✅ get business
@@ -57,12 +66,6 @@ async function fetchData() {
     if (bizError || !businesses || businesses.length === 0) {
       alert("No business linked");
       return;
-    }
-
-    if (!businesses || businesses.length !== 1) {
-        console.error("Invalid business mapping", businesses);
-        alert("Business error");
-        return;
     }
 
     const BUSINESS_ID = businesses[0].id;
@@ -112,6 +115,7 @@ async function fetchData() {
         <td>${lead.exam || ""}</td>
 
         <td>
+          <!-- ✅ FIXED id -->
           <select onchange="updateStatus('${lead.id}', this.value)">
             <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
             <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
@@ -132,7 +136,7 @@ async function fetchData() {
   }
 }
 
-// ✅ NEW FUNCTION ADDED
+// ✅ FIXED update query
 async function updateStatus(leadId, newStatus) {
   const { error } = await supabaseClient
     .from("Leads")
@@ -145,6 +149,12 @@ async function updateStatus(leadId, newStatus) {
   } else {
     console.log("Status updated");
   }
+}
+
+// ✅ NEW: LOGOUT FUNCTION
+async function logout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = "/login.html";
 }
 
 fetchData();
