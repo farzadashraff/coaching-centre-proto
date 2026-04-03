@@ -25,7 +25,6 @@ const supabaseClient = window.supabase.createClient(
 document.getElementById("signupBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   const msg = document.getElementById("msg");
 
   const { data, error } = await supabaseClient.auth.signUp({
@@ -38,9 +37,25 @@ document.getElementById("signupBtn").onclick = async () => {
     return;
   }
 
-  msg.innerText = "Signup successful! Redirecting...";
+  // ✅ WAIT for session
+  const { data: { user } } = await supabaseClient.auth.getUser();
 
-  // small delay for UX
+  // ✅ CREATE BUSINESS AUTOMATICALLY
+  const { error: bizError } = await supabaseClient
+    .from("Businesses")
+    .insert([{
+      name: "My Coaching Business",
+      user_id: user.id
+    }]);
+
+  if (bizError) {
+    msg.innerText = "Signup done, but business creation failed";
+    console.error(bizError);
+    return;
+  }
+
+  msg.innerText = "Account ready! Redirecting...";
+
   setTimeout(() => {
     window.location.href = "/admin.html";
   }, 1500);

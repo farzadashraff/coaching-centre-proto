@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Form</title>
+</head>
+<body>
+
+<h2>Student Inquiry Form</h2>
+
+<form id="leadForm">
+  <input type="text" id="name" placeholder="Name" required /><br><br>
+  <input type="text" id="phone" placeholder="Phone" required /><br><br>
+
+  <select id="stage" required>
+    <option value="">Select Academic Stage</option>
+    <option value="School (Class 9-10)">School (Class 9-10)</option>
+    <option value="School (Class 11-12)">School (Class 11-12)</option>
+    <option value="Dropper">Dropper</option>
+    <option value="Undergraduate">Undergraduate</option>
+    <option value="Postgraduate">Postgraduate</option>
+    <option value="Working Professional">Working Professional</option>
+  </select><br><br>
+
+  <select id="category" required>
+    <option value="">Select Category</option>
+    <option value="Engineering">Engineering & Technology</option>
+    <option value="Medical">Medical</option>
+    <option value="Abroad">Abroad / International</option>
+    <option value="Government">Government & Civil Services</option>
+    <option value="Professional">Professional Certifications</option>
+    <option value="Design">Design & Architecture</option>
+  </select><br><br>
+
+  <select id="exam" required>
+    <option value="">Select Exam</option>
+  </select><br><br>
+
+  <button type="submit">Submit</button>
+</form>
+
+<br>
+
+<button id="whatsappBtn" style="display:none;">
+  Message us on WhatsApp
+</button>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase.createClient(
+  "https://xsdalnxweznnjzogyqaa.supabase.co",
+  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
+);
+
+const TWILIO_NUMBER = "+14155238886";
+const JOIN_CODE = "join rays-doll";
+
+// ✅ NEW: GET BUSINESS_ID FROM URL
+const params = new URLSearchParams(window.location.search);
+const BUSINESS_ID = params.get("biz");
+
+// ✅ VALIDATION
+if (!BUSINESS_ID) {
+  alert("Invalid access. No business specified.");
+  throw new Error("Missing business_id in URL");
+}
+
+const examOptions = {
+  Engineering: ["JEE","GATE","BITSAT","VITEEE"],
+  Medical: ["NEET UG","NEET PG","FMGE"],
+  Abroad: ["IELTS","TOEFL","PTE"],
+  Government: ["UPSC","SSC"],
+  Professional: ["CFA","ACCA","AWS"],
+  Design: ["NATA","UCEED"]
+};
+
+document.getElementById("category").addEventListener("change", function () {
+  const examDropdown = document.getElementById("exam");
+  examDropdown.innerHTML = '<option value="">Select Exam</option>';
+
+  (examOptions[this.value] || []).forEach(exam => {
+    const option = document.createElement("option");
+    option.value = exam;
+    option.textContent = exam;
+    examDropdown.appendChild(option);
+  });
+});
+
+document.getElementById("leadForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  const stage = document.getElementById("stage").value;
+  const category = document.getElementById("category").value;
+  const exam = document.getElementById("exam").value;
+
+  // phone normalize
+  phone = phone.replace(/\D/g, "");
+  if (phone.length === 10) {
+    phone = "91" + phone;
+  }
+
+  const payload = {
+    name,
+    phone,
+    stage,
+    category,
+    exam,
+    business_id: BUSINESS_ID
+  };
+
+  const { error } = await supabaseClient
+    .from("Leads")
+    .insert([payload]);
+
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
+
+  alert("Form submitted successfully");
+
+  const btn = document.getElementById("whatsappBtn");
+  btn.style.display = "block";
+
+  btn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(JOIN_CODE);
+
+      alert(`Send "${JOIN_CODE}" to ${TWILIO_NUMBER}, then send "Hi"`);
+    } catch {
+      alert(`Send "${JOIN_CODE}" to ${TWILIO_NUMBER}`);
+    }
+  };
+});
+</script>
+
+</body>
+</html>

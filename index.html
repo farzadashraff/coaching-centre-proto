@@ -1,171 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lead Capture</title>
+  <title>FAZ Coaching</title>
 </head>
 <body>
 
-<h2>Student Inquiry Form</h2>
+<h1>Welcome to FAZ Coaching</h1>
 
-<form id="leadForm">
-  <input type="text" id="name" placeholder="Name" required /><br><br>
-  <input type="text" id="phone" placeholder="Phone" required /><br><br>
+<p>
+  FAZ Coaching is a modern SaaS platform designed for coaching centers to manage student inquiries,
+  streamline lead capture, and build a professional digital presence.
+</p>
 
-  <select id="stage" required>
-    <option value="">Select Academic Stage</option>
-    <option value="School (Class 9-10)">School (Class 9-10)</option>
-    <option value="School (Class 11-12)">School (Class 11-12)</option>
-    <option value="Dropper">Dropper</option>
-    <option value="Undergraduate">Undergraduate</option>
-    <option value="Postgraduate">Postgraduate</option>
-    <option value="Working Professional">Working Professional</option>
-  </select><br><br>
-
-  <select id="category" required>
-    <option value="">Select Category</option>
-    <option value="Engineering">Engineering & Technology</option>
-    <option value="Medical">Medical</option>
-    <option value="Abroad">Abroad / International</option>
-    <option value="Government">Government & Civil Services</option>
-    <option value="Professional">Professional Certifications</option>
-    <option value="Design">Design & Architecture</option>
-  </select><br><br>
-
-  <select id="exam" required>
-    <option value="">Select Exam</option>
-  </select><br><br>
-
-  <button type="submit">Submit</button>
-</form>
+<p>
+  Create your coaching system, manage your leads, and scale your operations with a clean and powerful interface.
+</p>
 
 <br>
 
-<button id="whatsappBtn" style="display:none;">
-  Message us on WhatsApp
-</button>
-
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-<script>
-const supabaseClient = window.supabase.createClient(
-  "https://xsdalnxweznnjzogyqaa.supabase.co",
-  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
-);
-
-const TWILIO_NUMBER = "+14155238886";
-const JOIN_CODE = "join rays-doll";
-
-const examOptions = {
-  Engineering: ["JEE","GATE","BITSAT","VITEEE"],
-  Medical: ["NEET UG","NEET PG","FMGE"],
-  Abroad: ["IELTS","TOEFL","PTE"],
-  Government: ["UPSC","SSC"],
-  Professional: ["CFA","ACCA","AWS"],
-  Design: ["NATA","UCEED"]
-};
-
-document.getElementById("category").addEventListener("change", function () {
-  const examDropdown = document.getElementById("exam");
-  examDropdown.innerHTML = '<option value="">Select Exam</option>';
-
-  (examOptions[this.value] || []).forEach(exam => {
-    const option = document.createElement("option");
-    option.value = exam;
-    option.textContent = exam;
-    examDropdown.appendChild(option);
-  });
-});
-
-document.getElementById("leadForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-
-  const name = document.getElementById("name").value.trim();
-  let phone = document.getElementById("phone").value.trim();
-  const stage = document.getElementById("stage").value;
-  const category = document.getElementById("category").value;
-  const exam = document.getElementById("exam").value;
-
-  // ✅ NORMALIZATION (CORRECT)
-  phone = phone.replace(/\D/g, "");
-  if (phone.length === 10) {
-    phone = "91" + phone;
-  }
-
-  // ✅ NEW: GET USER + BUSINESS (MOVED HERE)
-  const { data: { user } } = await supabaseClient.auth.getUser();
-
-  if (!user) {
-    alert("Not logged in");
-    return;
-  }
-
-  const { data: businesses, error: bizError } = await supabaseClient
-    .from("Businesses")
-    .select("*")
-    .eq("user_id", user.id);
-
-  if (bizError || !businesses || businesses.length === 0) {
-    alert("No business found for user");
-    console.error(bizError);
-    return;
-  }
-
-  const BUSINESS_ID = businesses[0].id;
-
-  const payload = {
-    name,
-    phone,
-    stage,
-    category,
-    exam,
-    business_id: BUSINESS_ID
-  };
-
-  console.log("SENDING:", payload);
-
-  const { data, error } = await supabaseClient
-    .from("Leads")
-    .insert([payload])
-    .select();
-
-  console.log("RESPONSE:", { data, error });
-
-  if (error) {
-    alert("Error: " + error.message);
-    return;
-  }
-
-  alert("Form submitted successfully");
-
-  const btn = document.getElementById("whatsappBtn");
-  btn.style.display = "block";
-
-  btn.onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(JOIN_CODE);
-
-      alert(
-`Open WhatsApp and follow steps:
-
-1. Send "${JOIN_CODE}" to ${TWILIO_NUMBER} (only first time)
-2. Wait for confirmation
-3. Then send "Hi"
-
-(Code copied to clipboard)`
-      );
-
-    } catch {
-      alert(
-`Open WhatsApp and send:
-
-"${JOIN_CODE}" to ${TWILIO_NUMBER}
-
-Then send "Hi"`
-      );
-    }
-  };
-});
-</script>
+<a href="form.html">Go to Student Form</a>
 
 </body>
 </html>
