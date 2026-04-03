@@ -13,7 +13,7 @@
 
 <h2>Leads Dashboard</h2>
 
-<!-- ✅ NEW: FORM LINK SECTION -->
+<!-- FORM LINK SECTION -->
 <div style="margin-bottom: 20px; padding:10px; border:1px solid #ccc;">
   <strong>Your Student Form Link:</strong><br><br>
   <input id="formLink" style="width: 80%;" readonly />
@@ -71,7 +71,7 @@ async function fetchData() {
 
     const BUSINESS_ID = businesses[0].id;
 
-    // ✅ GENERATE FORM LINK
+    // FORM LINK
     const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
     document.getElementById("formLink").value = link;
 
@@ -133,18 +133,25 @@ async function fetchData() {
   }
 }
 
+<!-- 🔥 DEBUG VERSION -->
 async function updateStatus(leadId, newStatus) {
-  const { error } = await supabaseClient
+  console.log("UPDATING:", leadId, newStatus);
+
+  const { data, error } = await supabaseClient
     .from("Leads")
     .update({ status: newStatus })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .select();
+
+  console.log("RESULT:", data, error);
 
   if (error) {
     alert("Failed to update status");
+    console.error(error);
   }
 }
 
-// ✅ COPY FUNCTION
+// COPY
 function copyLink() {
   const input = document.getElementById("formLink");
   input.select();
