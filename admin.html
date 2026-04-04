@@ -131,6 +131,7 @@ function render(leads) {
         if (l.status === "Converted") row.style.backgroundColor = "#d4edda"; // green
         if (l.status === "Dropped") row.style.backgroundColor = "#f8d7da"; // red
         if (l.status === "Interested") row.style.backgroundColor = "#fff3cd"; // yellow
+        if (l.status === "Contacted") row.style.backgroundColor = "#d1ecf1";
 
     row.innerHTML = `
         <td>${l.name || ""}</td>
