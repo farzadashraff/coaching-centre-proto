@@ -29,7 +29,7 @@
 </table>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
 <script>
 
 const supabaseClient = window.supabase.createClient(
@@ -41,18 +41,19 @@ let BUSINESS_ID = null;
 
 // ================= INIT =================
 async function init() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const { data: sessionData } = await supabaseClient.auth.getSession();
 
-  if (!user) {
+  if (!sessionData.session) {
     window.location.href = "/login.html";
     return;
   }
 
+  const user = sessionData.session.user;
+
   document.getElementById("userInfo").innerText =
     "Logged in as: " + user.email;
 
-  // get business
-  const { data: biz, error } = await supabaseClient
+  const { data: biz } = await supabaseClient
     .from("Businesses")
     .select("id")
     .eq("user_id", user.id)
