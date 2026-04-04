@@ -31,36 +31,35 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
-
 const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
-  "sb_publishable_XXXX"
+  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
 let BUSINESS_ID = null;
 
 // ================= INIT =================
 async function init() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
 
-  if (!sessionData.session) {
+  if (!user) {
     window.location.href = "/login.html";
     return;
   }
 
-  const user = sessionData.session.user;
-
   document.getElementById("userInfo").innerText =
     "Logged in as: " + user.email;
 
-  const { data: biz } = await supabaseClient
+  // get business
+  const { data: biz, error: bizError } = await supabaseClient
     .from("Businesses")
     .select("id")
     .eq("user_id", user.id)
     .single();
 
-  if (!biz) {
+  if (bizError || !biz) {
     alert("No business found");
+    console.error(bizError);
     return;
   }
 
@@ -76,6 +75,11 @@ async function loadLeads() {
     .select("*")
     .eq("business_id", BUSINESS_ID)
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   render(leads || []);
 }
@@ -109,7 +113,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
 // ================= START =================
 init();
-
 </script>
 
 </body>
