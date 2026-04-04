@@ -243,12 +243,22 @@ function renderPipeline(leads) {
 
   const statuses = ["New", "Interested", "Contacted", "Converted", "Dropped"];
 
-  // clear columns
+  // setup columns
   statuses.forEach(s => {
     const col = document.getElementById("col-" + s);
-    if (col) col.innerHTML = "";
+    if (!col) return;
+
+    col.innerHTML = "";
+
+    col.ondragover = (e) => e.preventDefault();
+
+    col.ondrop = async (e) => {
+      const id = e.dataTransfer.getData("id");
+      await updateStatus(id, s);
+    };
   });
 
+  // create cards
   leads.forEach(l => {
     const card = document.createElement("div");
 
@@ -260,26 +270,29 @@ function renderPipeline(leads) {
     card.style.cursor = "pointer";
     card.style.transition = "0.2s";
 
+    card.draggable = true;
+    card.dataset.id = l.id;
+
     card.innerHTML = `
       <strong>${l.name || "No Name"}</strong><br>
       <small>${l.phone || ""}</small>
     `;
-    card.onmouseenter = () => {
-    card.style.transform = "scale(1.02)";
-    card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-};
 
-card.onmouseleave = () => {
-  card.style.transform = "scale(1)";
-  card.style.boxShadow = "none";
-};
-    // click = quick cycle status (optional simple UX)
-    card.onclick = async () => {
-      const order = ["New", "Interested", "Contacted", "Converted", "Dropped"];
-      const next = order[(order.indexOf(l.status) + 1) % order.length];
-      await updateStatus(l.id, next);
+    card.onmouseenter = () => {
+      card.style.transform = "scale(1.02)";
+      card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
     };
 
+    card.onmouseleave = () => {
+      card.style.transform = "scale(1)";
+      card.style.boxShadow = "none";
+    };
+
+    card.ondragstart = (e) => {
+      e.dataTransfer.setData("id", l.id);
+    };
+
+    // ✅ APPEND CARD (CRITICAL)
     const column = document.getElementById("col-" + l.status);
     if (column) column.appendChild(card);
   });
