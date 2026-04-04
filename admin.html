@@ -19,7 +19,19 @@
 </div>
 
 <br>
+<br>
 
+<label>Filter by Status: </label>
+<select id="statusFilter">
+  <option value="All">All</option>
+  <option value="New">New</option>
+  <option value="Interested">Interested</option>
+  <option value="Contacted">Contacted</option>
+  <option value="Converted">Converted</option>
+  <option value="Dropped">Dropped</option>
+</select>
+
+<br><br>
 <table border="1">
   <thead>
     <tr>
@@ -41,7 +53,7 @@ const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
-
+let ALL_LEADS = [];
 let BUSINESS_ID = null;
 
 // ================= INIT =================
@@ -73,6 +85,7 @@ async function init() {
   setFormLink();
 
   loadLeads();
+
 }
 
 // ================= LOAD LEADS =================
@@ -88,8 +101,13 @@ async function loadLeads() {
     return;
   }
 
-  render(leads || []);
+  // ✅ ADD THIS
+  ALL_LEADS = leads || [];
+
+  // ✅ REPLACE THIS LINE
+  render(ALL_LEADS);
 }
+
 function setFormLink() {
   const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
   document.getElementById("formLink").value = link;
@@ -109,6 +127,10 @@ function render(leads) {
 
   leads.forEach(l => {
     const row = document.createElement("tr");
+    // COLOR CODING
+        if (l.status === "Converted") row.style.backgroundColor = "#d4edda"; // green
+        if (l.status === "Dropped") row.style.backgroundColor = "#f8d7da"; // red
+        if (l.status === "Interested") row.style.backgroundColor = "#fff3cd"; // yellow
 
     row.innerHTML = `
         <td>${l.name || ""}</td>
@@ -129,7 +151,18 @@ function render(leads) {
 
     table.appendChild(row);
   });
+
 }
+document.getElementById("statusFilter").addEventListener("change", () => {
+  const selected = document.getElementById("statusFilter").value;
+
+  if (selected === "All") {
+    render(ALL_LEADS);
+  } else {
+    const filtered = ALL_LEADS.filter(l => l.status === selected);
+    render(filtered);
+  }
+});
 async function updateStatus(id, newStatus) {
   const { error } = await supabaseClient
     .from("Leads")
@@ -139,7 +172,10 @@ async function updateStatus(id, newStatus) {
   if (error) {
     console.error(error);
     alert("Failed to update");
+    return;
   }
+
+  await loadLeads(); // refresh UI
 }
 
 // ================= LOGOUT =================
