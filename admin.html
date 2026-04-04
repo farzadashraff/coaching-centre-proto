@@ -6,35 +6,64 @@
 <body>
 
 <h2>Leads Dashboard</h2>
-<div style="margin:20px 0; padding:10px; border:1px solid #ccc;">
+<div style="margin:20px 0; padding:15px; border:1px solid #ccc;">
+
   <strong>Analytics</strong><br><br>
 
-  Total Leads: <span id="totalLeads">0</span> |
-  Converted: <span id="convertedLeads">0</span> |
-  Dropped: <span id="droppedLeads">0</span> |
-  Conversion Rate: <span id="conversionRate">0%</span>
+  <!-- TOP STATS -->
+  <div style="display:flex; gap:20px; flex-wrap:wrap;">
+    <div style="padding:10px; border:1px solid #aaa;">
+      <div>Total Leads</div>
+      <strong id="totalLeads">0</strong>
+    </div>
 
-  <br><br>
+    <div style="padding:10px; border:1px solid #aaa;">
+      <div>Converted</div>
+      <strong id="convertedLeads">0</strong>
+    </div>
 
-  <strong>Status Breakdown:</strong><br>
-  New: <span id="newCount">0</span> |
-  Interested: <span id="interestedCount">0</span> |
-  Contacted: <span id="contactedCount">0</span>
+    <div style="padding:10px; border:1px solid #aaa;">
+      <div>Dropped</div>
+      <strong id="droppedLeads">0</strong>
+    </div>
 
-  <br><br>
+    <div style="padding:10px; border:1px solid #aaa;">
+      <div>Conversion Rate</div>
+      <strong id="conversionRate">0%</strong>
+    </div>
+  </div>
 
-  <strong>Today:</strong>
-  <span id="todayLeads">0</span> leads
+  <br>
 
-  <br><br>
+  <!-- STATUS -->
+  <div style="padding:10px; border:1px solid #aaa;">
+    <strong>Status Breakdown</strong><br><br>
+    New: <strong id="newCount">0</strong> |
+    Interested: <strong id="interestedCount">0</strong> |
+    Contacted: <strong id="contactedCount">0</strong>
+  </div>
 
-  <strong>Category:</strong><br>
-  Engineering: <span id="engCount">0</span> |
-  Medical: <span id="medCount">0</span> |
-  Abroad: <span id="abroadCount">0</span> |
-  Government: <span id="govCount">0</span> |
-  Professional: <span id="profCount">0</span> |
-  Design: <span id="designCount">0</span>
+  <br>
+
+  <!-- TODAY -->
+  <div style="padding:10px; border:1px solid #aaa;">
+    <strong>Today</strong><br>
+    <span id="todayLeads">0</span> leads
+  </div>
+
+  <br>
+
+  <!-- CATEGORY -->
+  <div style="padding:10px; border:1px solid #aaa;">
+    <strong>Category</strong><br><br>
+    Engineering: <strong id="engCount">0</strong> |
+    Medical: <strong id="medCount">0</strong> |
+    Abroad: <strong id="abroadCount">0</strong> |
+    Government: <strong id="govCount">0</strong> |
+    Professional: <strong id="profCount">0</strong> |
+    Design: <strong id="designCount">0</strong>
+  </div>
+
 </div>
 
 <div style="margin: 20px 0;">
