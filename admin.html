@@ -93,12 +93,20 @@ function render(leads) {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${l.name || ""}</td>
-      <td>${l.phone || ""}</td>
-      <td>${l.stage || ""}</td>
-      <td>${l.category || ""}</td>
-      <td>${l.exam || ""}</td>
-      <td>${l.status || "New"}</td>
+        <td>${l.name || ""}</td>
+        <td>${l.phone || ""}</td>
+        <td>${l.stage || ""}</td>
+        <td>${l.category || ""}</td>
+        <td>${l.exam || ""}</td>
+        <td>
+            <select onchange="updateStatus('${l.id}', this.value)">
+                <option ${l.status === "New" ? "selected" : ""}>New</option>
+                <option ${l.status === "Interested" ? "selected" : ""}>Interested</option>
+                <option ${l.status === "Contacted" ? "selected" : ""}>Contacted</option>
+                <option ${l.status === "Converted" ? "selected" : ""}>Converted</option>
+                <option ${l.status === "Dropped" ? "selected" : ""}>Dropped</option>
+            </select>
+        </td>
     `;
 
     table.appendChild(row);
