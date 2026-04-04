@@ -29,9 +29,10 @@
 </table>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_XXXX"
 );
@@ -40,7 +41,7 @@ let BUSINESS_ID = null;
 
 // ================= INIT =================
 async function init() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
 
   if (!user) {
     window.location.href = "/login.html";
@@ -51,7 +52,7 @@ async function init() {
     "Logged in as: " + user.email;
 
   // get business
-  const { data: biz, error } = await supabase
+  const { data: biz, error } = await supabaseClient
     .from("Businesses")
     .select("id")
     .eq("user_id", user.id)
@@ -69,7 +70,7 @@ async function init() {
 
 // ================= LOAD LEADS =================
 async function loadLeads() {
-  const { data: leads, error } = await supabase
+  const { data: leads, error } = await supabaseClient
     .from("Leads")
     .select("*")
     .eq("business_id", BUSINESS_ID)
@@ -101,7 +102,7 @@ function render(leads) {
 
 // ================= LOGOUT =================
 document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   window.location.href = "/login.html";
 });
 
