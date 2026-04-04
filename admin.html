@@ -7,6 +7,12 @@
 
 <h2>Leads Dashboard</h2>
 
+<div style="margin: 20px 0;">
+  <strong>Your Student Form Link:</strong><br>
+  <input id="formLink" style="width: 400px;" readonly />
+  <button onclick="copyLink()">Copy</button>
+</div>
+
 <div>
   <strong id="userInfo">Checking user...</strong>
   <button id="logoutBtn">Logout</button>
@@ -64,6 +70,7 @@ async function init() {
   }
 
   BUSINESS_ID = biz.id;
+  setFormLink();
 
   loadLeads();
 }
@@ -82,6 +89,17 @@ async function loadLeads() {
   }
 
   render(leads || []);
+}
+function setFormLink() {
+  const link = `${window.location.origin}/student-form.html?biz=${BUSINESS_ID}`;
+  document.getElementById("formLink").value = link;
+}
+
+function copyLink() {
+  const input = document.getElementById("formLink");
+  input.select();
+  document.execCommand("copy");
+  alert("Link copied!");
 }
 
 // ================= RENDER =================
@@ -111,6 +129,17 @@ function render(leads) {
 
     table.appendChild(row);
   });
+}
+async function updateStatus(id, newStatus) {
+  const { error } = await supabaseClient
+    .from("Leads")
+    .update({ status: newStatus })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to update");
+  }
 }
 
 // ================= LOGOUT =================
