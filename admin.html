@@ -5,20 +5,14 @@
 </head>
 <body>
 
-<!-- USER INFO -->
-<div style="margin-bottom: 10px;">
-  <strong id="userInfo">Checking user...</strong>
-  <button onclick="logout()" style="margin-left: 10px;">Logout</button>
-</div>
-
 <h2>Leads Dashboard</h2>
 
-<!-- FORM LINK SECTION -->
-<div style="margin-bottom: 20px; padding:10px; border:1px solid #ccc;">
-  <strong>Your Student Form Link:</strong><br><br>
-  <input id="formLink" style="width: 80%;" readonly />
-  <button onclick="copyLink()">Copy</button>
+<div>
+  <strong id="userInfo">Checking user...</strong>
+  <button id="logoutBtn">Logout</button>
 </div>
+
+<br>
 
 <table border="1">
   <thead>
@@ -29,7 +23,6 @@
       <th>Category</th>
       <th>Exam</th>
       <th>Status</th>
-      <th>Duration</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -37,16 +30,13 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-console.log("ADMIN FILE VERSION 999");
 
 const supabase = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
-  "sb_publishable_..."
+  "sb_publishable_XXXX"
 );
 
 let BUSINESS_ID = null;
-let LEADS = [];
-let INTERACTIONS = [];
 
 // ================= INIT =================
 async function init() {
@@ -57,9 +47,11 @@ async function init() {
     return;
   }
 
-  document.getElementById("userInfo").innerText = "Logged in as: " + user.email;
+  document.getElementById("userInfo").innerText =
+    "Logged in as: " + user.email;
 
-  const { data: biz } = await supabase
+  // get business
+  const { data: biz, error } = await supabase
     .from("Businesses")
     .select("id")
     .eq("user_id", user.id)
@@ -72,168 +64,50 @@ async function init() {
 
   BUSINESS_ID = biz.id;
 
-  const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
-  document.getElementById("formLink").value = link;
-
-  await loadData();
+  loadLeads();
 }
 
-// ================= LOAD DATA =================
-async function loadData() {
-  const { data: leads } = await supabase
+// ================= LOAD LEADS =================
+async function loadLeads() {
+  const { data: leads, error } = await supabase
     .from("Leads")
     .select("*")
     .eq("business_id", BUSINESS_ID)
     .order("created_at", { ascending: false });
 
-  const { data: interactions } = await supabase
-    .from("interactions")
-    .select("*");
-
-  LEADS = leads || [];
-  INTERACTIONS = interactions || [];
-
-  render();
+  render(leads || []);
 }
 
-// ================= GROUP =================
-function groupLeads() {
-  const grouped = {
-    New: [],
-    Contacted: [],
-    Interested: [],
-    Converted: [],
-    Dropped: []
-  };
-
-  LEADS.forEach(l => {
-    const status = l.status || "New";
-    if (!grouped[status]) grouped[status] = [];
-    grouped[status].push(l);
-  });
-
-  return grouped;
-}
-
-// ================= INTERACTIONS =================
-function getLeadInteractions(leadId) {
-  return INTERACTIONS
-    .filter(i => i.lead_id === leadId)
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-}
-
-function getLastInteraction(leadId) {
-  const list = getLeadInteractions(leadId);
-  return list.length ? list[0] : null;
-}
-
-// ================= UPDATE STATUS =================
-async function updateStatus(leadId, newStatus) {
-  const { error } = await supabase
-    .from("Leads")
-    .update({ status: newStatus })
-    .eq("id", leadId);
-
-  if (error) {
-    alert("Failed to update status");
-    return;
-  }
-
-  await logInteraction(leadId, "status_change", newStatus);
-  await loadData();
-}
-
-// ================= LOG =================
-async function logInteraction(leadId, type, message = "") {
-  await supabase.from("interactions").insert([{
-    lead_id: leadId,
-    type,
-    message
-  }]);
-}
-
-// ================= WHATSAPP =================
-function triggerWhatsApp(lead) {
-  const msg = `Hi ${lead.name}, regarding your ${lead.exam || ""} preparation`;
-  const url = `https://wa.me/${lead.phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, "_blank");
-
-  logInteraction(lead.id, "whatsapp", "Sent WhatsApp message");
-}
-
-// ================= ADD NOTE =================
-async function addNote(leadId, note) {
-  if (!note) return;
-  await logInteraction(leadId, "note", note);
-  await loadData();
-}
-
-// ================= RENDER (GROUPED VERSION) =================
-function render() {
+// ================= RENDER =================
+function render(leads) {
   const table = document.getElementById("tableBody");
   table.innerHTML = "";
 
-  const grouped = groupLeads();
-
-  const allLeads = [
-    ...grouped.New,
-    ...grouped.Contacted,
-    ...grouped.Interested,
-    ...grouped.Converted,
-    ...grouped.Dropped
-  ];
-
-  allLeads.forEach(lead => {
-    const last = getLastInteraction(lead.id);
-
+  leads.forEach(l => {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${lead.name || ""}</td>
-      <td>${lead.phone || ""}</td>
-      <td>${lead.stage || ""}</td>
-      <td>${lead.category || ""}</td>
-      <td>${lead.exam || ""}</td>
-
-      <td>
-        <select onchange="updateStatus('${lead.id}', this.value)">
-          <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
-          <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
-          <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
-          <option ${lead.status === 'Converted' ? 'selected' : ''}>Converted</option>
-          <option ${lead.status === 'Dropped' ? 'selected' : ''}>Dropped</option>
-        </select>
-      </td>
-
-      <td>${last ? last.type : "No Activity"}</td>
+      <td>${l.name || ""}</td>
+      <td>${l.phone || ""}</td>
+      <td>${l.stage || ""}</td>
+      <td>${l.category || ""}</td>
+      <td>${l.exam || ""}</td>
+      <td>${l.status || "New"}</td>
     `;
 
     table.appendChild(row);
   });
 }
 
-// ================= COPY =================
-function copyLink() {
-  const input = document.getElementById("formLink");
-  input.select();
-  document.execCommand("copy");
-  alert("Link copied!");
-}
-
 // ================= LOGOUT =================
-async function logout() {
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   await supabase.auth.signOut();
   window.location.href = "/login.html";
-}
-
-// ================= EXPOSE =================
-window.logout = logout;
-window.updateStatus = updateStatus;
-window.triggerWhatsApp = triggerWhatsApp;
-window.addNote = addNote;
+});
 
 // ================= START =================
 init();
+
 </script>
 
 </body>
