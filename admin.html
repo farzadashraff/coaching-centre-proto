@@ -135,6 +135,7 @@
       <th>Category</th>
       <th>Exam</th>
       <th>Status</th>
+      <th>Assigned To</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -233,6 +234,14 @@ function render(leads) {
         <button onclick="addNote('${l.id}')">Add Note</button>
         <button onclick="viewHistory('${l.id}')">View</button>
       </td>
+
+      <td>
+        <input 
+          value="${l.assigned_to || ""}" 
+          placeholder="Assign..." 
+          onchange="updateAssigned('${l.id}', this.value)"
+        />
+      </td>
     `;
 
     table.appendChild(row);
@@ -274,9 +283,10 @@ function renderPipeline(leads) {
     card.dataset.id = l.id;
 
     card.innerHTML = `
-      <strong>${l.name || "No Name"}</strong><br>
-      <small>${l.phone || ""}</small>
-    `;
+  <strong>${l.name || "No Name"}</strong><br>
+  <small>${l.phone || ""}</small><br>
+  <small>👤 ${l.assigned_to || "Unassigned"}</small>
+  `;
 
     card.onmouseenter = () => {
       card.style.transform = "scale(1.02)";
@@ -395,6 +405,29 @@ async function updateStatus(id, newStatus) {
       lead_id: id,
       type: "status",
       message: "Status changed to " + newStatus
+    }]);
+
+  await loadLeads();
+}
+// ================= UPDATE ASSIGNED TO =================
+async function updateAssigned(id, value) {
+  const { error } = await supabaseClient
+    .from("Leads")
+    .update({ assigned_to: value })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to assign");
+    return;
+  }
+
+  await supabaseClient
+    .from("interactions")
+    .insert([{
+      lead_id: id,
+      type: "assignment",
+      message: "Assigned to " + value
     }]);
 
   await loadLeads();
