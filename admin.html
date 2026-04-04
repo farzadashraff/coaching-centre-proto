@@ -98,27 +98,27 @@
 
 <div id="pipeline" style="display:flex; gap:15px; margin-bottom:20px;">
 
-  <div style="flex:1; border:1px solid #aaa; padding:10px;">
+  <div style="flex:1; padding:10px; background:#f1f1f1;">
     <strong>New</strong>
     <div id="col-New"></div>
   </div>
 
-  <div style="flex:1; border:1px solid #aaa; padding:10px;">
+  <div style="flex:1; padding:10px; background:#fff3cd;">
     <strong>Interested</strong>
     <div id="col-Interested"></div>
   </div>
 
-  <div style="flex:1; border:1px solid #aaa; padding:10px;">
+  <div style="flex:1; padding:10px; background:#d1ecf1;">
     <strong>Contacted</strong>
     <div id="col-Contacted"></div>
   </div>
 
-  <div style="flex:1; border:1px solid #aaa; padding:10px;">
+  <div style="flex:1; padding:10px; background:#d4edda;">
     <strong>Converted</strong>
     <div id="col-Converted"></div>
   </div>
 
-  <div style="flex:1; border:1px solid #aaa; padding:10px;">
+  <div style="flex:1; padding:10px; background:#f8d7da;">
     <strong>Dropped</strong>
     <div id="col-Dropped"></div>
   </div>
@@ -252,16 +252,27 @@ function renderPipeline(leads) {
   leads.forEach(l => {
     const card = document.createElement("div");
 
-    card.style.border = "1px solid #ccc";
-    card.style.padding = "5px";
-    card.style.margin = "5px 0";
+    card.style.border = "1px solid #aaa";
+    card.style.padding = "8px";
+    card.style.margin = "8px 0";
+    card.style.background = "#fff";
+    card.style.borderRadius = "6px";
     card.style.cursor = "pointer";
+    card.style.transition = "0.2s";
 
     card.innerHTML = `
       <strong>${l.name || "No Name"}</strong><br>
       <small>${l.phone || ""}</small>
     `;
+    card.onmouseenter = () => {
+    card.style.transform = "scale(1.02)";
+    card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+};
 
+card.onmouseleave = () => {
+  card.style.transform = "scale(1)";
+  card.style.boxShadow = "none";
+};
     // click = quick cycle status (optional simple UX)
     card.onclick = async () => {
       const order = ["New", "Interested", "Contacted", "Converted", "Dropped"];
@@ -344,6 +355,8 @@ function applyFilters() {
   }
 
   render(filtered);
+renderPipeline(filtered);
+updateAnalytics(filtered);
 }
 
 // ✅ ONLY ONE SET OF LISTENERS (FIXED)
