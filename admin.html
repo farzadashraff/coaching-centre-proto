@@ -6,6 +6,14 @@
 <body>
 
 <h2>Leads Dashboard</h2>
+<div style="margin:20px 0; padding:10px; border:1px solid #ccc;">
+  <strong>Analytics</strong><br><br>
+
+  Total Leads: <span id="totalLeads">0</span> |
+  Converted: <span id="convertedLeads">0</span> |
+  Dropped: <span id="droppedLeads">0</span> |
+  Conversion Rate: <span id="conversionRate">0%</span>
+</div>
 
 <div style="margin: 20px 0;">
   <strong>Your Student Form Link:</strong><br>
@@ -103,7 +111,8 @@ async function loadLeads() {
   }
 
   ALL_LEADS = leads || [];
-  render(ALL_LEADS);
+render(ALL_LEADS);
+updateAnalytics(ALL_LEADS);
 }
 
 // ================= RENDER =================
@@ -144,6 +153,22 @@ function render(leads) {
 
     table.appendChild(row);
   });
+}
+// ================= ANALYTICS =================
+function updateAnalytics(leads) {
+  const total = leads.length;
+
+  const converted = leads.filter(l => l.status === "Converted").length;
+  const dropped = leads.filter(l => l.status === "Dropped").length;
+
+  const rate = total > 0
+    ? ((converted / total) * 100).toFixed(1)
+    : 0;
+
+  document.getElementById("totalLeads").innerText = total;
+  document.getElementById("convertedLeads").innerText = converted;
+  document.getElementById("droppedLeads").innerText = dropped;
+  document.getElementById("conversionRate").innerText = rate + "%";
 }
 
 // ================= APPLY FILTERS =================
