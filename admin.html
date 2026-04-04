@@ -18,8 +18,10 @@
   <button id="logoutBtn">Logout</button>
 </div>
 
-<br>
-<br>
+<br><br>
+
+<input id="searchInput" placeholder="Search name or phone" />
+<br><br>
 
 <label>Filter by Status: </label>
 <select id="statusFilter">
@@ -32,6 +34,7 @@
 </select>
 
 <br><br>
+
 <table border="1">
   <thead>
     <tr>
@@ -53,12 +56,13 @@ const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
+
 let ALL_LEADS = [];
 let BUSINESS_ID = null;
 
 // ================= INIT =================
 async function init() {
-  const { data: { user }, error } = await supabaseClient.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
 
   if (!user) {
     window.location.href = "/login.html";
@@ -68,7 +72,6 @@ async function init() {
   document.getElementById("userInfo").innerText =
     "Logged in as: " + user.email;
 
-  // get business
   const { data: biz, error: bizError } = await supabaseClient
     .from("Businesses")
     .select("id")
@@ -83,9 +86,7 @@ async function init() {
 
   BUSINESS_ID = biz.id;
   setFormLink();
-
   loadLeads();
-
 }
 
 // ================= LOAD LEADS =================
@@ -101,23 +102,8 @@ async function loadLeads() {
     return;
   }
 
-  // ✅ ADD THIS
   ALL_LEADS = leads || [];
-
-  // ✅ REPLACE THIS LINE
   render(ALL_LEADS);
-}
-
-function setFormLink() {
-  const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
-  document.getElementById("formLink").value = link;
-}
-
-function copyLink() {
-  const input = document.getElementById("formLink");
-  input.select();
-  document.execCommand("copy");
-  alert("Link copied!");
 }
 
 // ================= RENDER =================
@@ -127,33 +113,40 @@ function render(leads) {
 
   leads.forEach(l => {
     const row = document.createElement("tr");
-    // COLOR CODING
-        if (l.status === "Converted") row.style.backgroundColor = "#d4edda"; // green
-        if (l.status === "Dropped") row.style.backgroundColor = "#f8d7da"; // red
-        if (l.status === "Interested") row.style.backgroundColor = "#fff3cd"; // yellow
-        if (l.status === "Contacted") row.style.backgroundColor = "#d1ecf1";
+
+    if (l.status === "Converted") row.style.backgroundColor = "#d4edda";
+    if (l.status === "Dropped") row.style.backgroundColor = "#f8d7da";
+    if (l.status === "Interested") row.style.backgroundColor = "#fff3cd";
+    if (l.status === "Contacted") row.style.backgroundColor = "#d1ecf1";
 
     row.innerHTML = `
-        <td>${l.name || ""}</td>
-        <td>${l.phone || ""}</td>
-        <td>${l.stage || ""}</td>
-        <td>${l.category || ""}</td>
-        <td>${l.exam || ""}</td>
-        <td>
-            <select onchange="updateStatus('${l.id}', this.value)">
-                <option ${l.status === "New" ? "selected" : ""}>New</option>
-                <option ${l.status === "Interested" ? "selected" : ""}>Interested</option>
-                <option ${l.status === "Contacted" ? "selected" : ""}>Contacted</option>
-                <option ${l.status === "Converted" ? "selected" : ""}>Converted</option>
-                <option ${l.status === "Dropped" ? "selected" : ""}>Dropped</option>
-            </select>
-        </td>
+      <td>${l.name || ""}</td>
+      <td>${l.phone || ""}</td>
+      <td>${l.stage || ""}</td>
+      <td>${l.category || ""}</td>
+      <td>${l.exam || ""}</td>
+
+      <td>
+        <select onchange="updateStatus('${l.id}', this.value)">
+          <option value="New" ${l.status === "New" ? "selected" : ""}>New</option>
+          <option value="Interested" ${l.status === "Interested" ? "selected" : ""}>Interested</option>
+          <option value="Contacted" ${l.status === "Contacted" ? "selected" : ""}>Contacted</option>
+          <option value="Converted" ${l.status === "Converted" ? "selected" : ""}>Converted</option>
+          <option value="Dropped" ${l.status === "Dropped" ? "selected" : ""}>Dropped</option>
+        </select>
+
+        <br><br>
+
+        <button onclick="addNote('${l.id}')">Add Note</button>
+        <button onclick="viewHistory('${l.id}')">View</button>
+      </td>
     `;
 
     table.appendChild(row);
   });
-
 }
+
+// ================= FILTER =================
 document.getElementById("statusFilter").addEventListener("change", () => {
   const selected = document.getElementById("statusFilter").value;
 
@@ -164,6 +157,20 @@ document.getElementById("statusFilter").addEventListener("change", () => {
     render(filtered);
   }
 });
+
+// ================= SEARCH =================
+document.getElementById("searchInput").addEventListener("input", () => {
+  const value = document.getElementById("searchInput").value.toLowerCase();
+
+  const filtered = ALL_LEADS.filter(l =>
+    (l.name || "").toLowerCase().includes(value) ||
+    (l.phone || "").includes(value)
+  );
+
+  render(filtered);
+});
+
+// ================= UPDATE STATUS =================
 async function updateStatus(id, newStatus) {
   const { error } = await supabaseClient
     .from("Leads")
@@ -176,7 +183,67 @@ async function updateStatus(id, newStatus) {
     return;
   }
 
-  await loadLeads(); // refresh UI
+  await loadLeads();
+}
+
+// ================= ADD NOTE =================
+async function addNote(leadId) {
+  const note = prompt("Enter note:");
+  if (!note) return;
+
+  const { error } = await supabaseClient
+    .from("interactions")
+    .insert([{
+      lead_id: leadId,
+      type: "note",
+      message: note
+    }]);
+
+  if (error) {
+    alert("Failed to save note");
+    console.error(error);
+  } else {
+    alert("Note saved");
+  }
+}
+
+// ================= VIEW HISTORY =================
+async function viewHistory(leadId) {
+  const { data, error } = await supabaseClient
+    .from("interactions")
+    .select("*")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    alert("Error loading history");
+    return;
+  }
+
+  if (!data.length) {
+    alert("No history found");
+    return;
+  }
+
+  let text = "";
+  data.forEach(i => {
+    text += `[${i.type}] ${i.message || ""}\n`;
+  });
+
+  alert(text);
+}
+
+// ================= UTIL =================
+function setFormLink() {
+  const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
+  document.getElementById("formLink").value = link;
+}
+
+function copyLink() {
+  const input = document.getElementById("formLink");
+  input.select();
+  document.execCommand("copy");
+  alert("Link copied!");
 }
 
 // ================= LOGOUT =================
