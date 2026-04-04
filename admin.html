@@ -13,6 +13,28 @@
   Converted: <span id="convertedLeads">0</span> |
   Dropped: <span id="droppedLeads">0</span> |
   Conversion Rate: <span id="conversionRate">0%</span>
+
+  <br><br>
+
+  <strong>Status Breakdown:</strong><br>
+  New: <span id="newCount">0</span> |
+  Interested: <span id="interestedCount">0</span> |
+  Contacted: <span id="contactedCount">0</span>
+
+  <br><br>
+
+  <strong>Today:</strong>
+  <span id="todayLeads">0</span> leads
+
+  <br><br>
+
+  <strong>Category:</strong><br>
+  Engineering: <span id="engCount">0</span> |
+  Medical: <span id="medCount">0</span> |
+  Abroad: <span id="abroadCount">0</span> |
+  Government: <span id="govCount">0</span> |
+  Professional: <span id="profCount">0</span> |
+  Design: <span id="designCount">0</span>
 </div>
 
 <div style="margin: 20px 0;">
@@ -165,10 +187,44 @@ function updateAnalytics(leads) {
     ? ((converted / total) * 100).toFixed(1)
     : 0;
 
+  // STATUS BREAKDOWN
+  const newCount = leads.filter(l => l.status === "New").length;
+  const interested = leads.filter(l => l.status === "Interested").length;
+  const contacted = leads.filter(l => l.status === "Contacted").length;
+
+  // TODAY LEADS
+  const today = new Date().toISOString().split("T")[0];
+  const todayLeads = leads.filter(l => {
+    if (!l.created_at) return false;
+    return l.created_at.startsWith(today);
+  }).length;
+
+  // CATEGORY BREAKDOWN
+  const eng = leads.filter(l => l.category === "Engineering").length;
+  const med = leads.filter(l => l.category === "Medical").length;
+  const abroad = leads.filter(l => l.category === "Abroad").length;
+  const gov = leads.filter(l => l.category === "Government").length;
+  const prof = leads.filter(l => l.category === "Professional").length;
+  const design = leads.filter(l => l.category === "Design").length;
+
+  // UPDATE UI
   document.getElementById("totalLeads").innerText = total;
   document.getElementById("convertedLeads").innerText = converted;
   document.getElementById("droppedLeads").innerText = dropped;
   document.getElementById("conversionRate").innerText = rate + "%";
+
+  document.getElementById("newCount").innerText = newCount;
+  document.getElementById("interestedCount").innerText = interested;
+  document.getElementById("contactedCount").innerText = contacted;
+
+  document.getElementById("todayLeads").innerText = todayLeads;
+
+  document.getElementById("engCount").innerText = eng;
+  document.getElementById("medCount").innerText = med;
+  document.getElementById("abroadCount").innerText = abroad;
+  document.getElementById("govCount").innerText = gov;
+  document.getElementById("profCount").innerText = prof;
+  document.getElementById("designCount").innerText = design;
 }
 
 // ================= APPLY FILTERS =================
