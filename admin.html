@@ -146,29 +146,30 @@ function render(leads) {
   });
 }
 
-// ================= FILTER =================
-document.getElementById("statusFilter").addEventListener("change", () => {
-  const selected = document.getElementById("statusFilter").value;
+// ================= APPLY FILTERS =================
+function applyFilters() {
+  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+  const selectedStatus = document.getElementById("statusFilter").value;
 
-  if (selected === "All") {
-    render(ALL_LEADS);
-  } else {
-    const filtered = ALL_LEADS.filter(l => l.status === selected);
-    render(filtered);
+  let filtered = ALL_LEADS;
+
+  if (searchValue) {
+    filtered = filtered.filter(l =>
+      (l.name || "").toLowerCase().includes(searchValue) ||
+      (l.phone || "").includes(searchValue)
+    );
   }
-});
 
-// ================= SEARCH =================
-document.getElementById("searchInput").addEventListener("input", () => {
-  const value = document.getElementById("searchInput").value.toLowerCase();
-
-  const filtered = ALL_LEADS.filter(l =>
-    (l.name || "").toLowerCase().includes(value) ||
-    (l.phone || "").includes(value)
-  );
+  if (selectedStatus !== "All") {
+    filtered = filtered.filter(l => l.status === selectedStatus);
+  }
 
   render(filtered);
-});
+}
+
+// ✅ ONLY ONE SET OF LISTENERS (FIXED)
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
 
 // ================= UPDATE STATUS =================
 async function updateStatus(id, newStatus) {
@@ -182,6 +183,14 @@ async function updateStatus(id, newStatus) {
     alert("Failed to update");
     return;
   }
+
+  await supabaseClient
+    .from("interactions")
+    .insert([{
+      lead_id: id,
+      type: "status",
+      message: "Status changed to " + newStatus
+    }]);
 
   await loadLeads();
 }
