@@ -28,18 +28,27 @@ const supabaseClient = window.supabase.createClient(
 
 // ✅ LOGIN
 document.getElementById("loginBtn").onclick = async () => {
+  console.log("Login clicked");
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+
+  console.log("Email:", email);
+  console.log("Password:", password);
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
 
+  console.log("Response:", data, error);
+
   if (error) {
     alert(error.message);
     return;
   }
+
+  console.log("Login success");
 
   window.location.href = "/admin.html";
 };
