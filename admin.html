@@ -36,122 +36,183 @@
 </table>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
 <script>
-const SUPABASE_URL = "https://xsdalnxweznnjzogyqaa.supabase.co";
-const SUPABASE_KEY = "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt";
+console.log("ADMIN FILE VERSION 999");
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+const supabase = window.supabase.createClient(
+  "https://xsdalnxweznnjzogyqaa.supabase.co",
+  "sb_publishable_..."
 );
 
-async function fetchData() {
-  try {
-    const { data: { user } } = await supabaseClient.auth.getUser();
+let BUSINESS_ID = null;
+let LEADS = [];
+let INTERACTIONS = [];
 
-    if (!user) {
-      alert("Not logged in");
-      window.location.href = "/login.html";
-      return;
-    }
+// ================= INIT =================
+async function init() {
+  const { data: { user } } = await supabase.auth.getUser();
 
-    document.getElementById("userInfo").innerText = "Logged in as: " + user.email;
-
-    // GET BUSINESS
-    const { data: businesses, error: bizError } = await supabaseClient
-      .from("Businesses")
-      .select("*")
-      .eq("user_id", user.id);
-
-    if (bizError || !businesses || businesses.length === 0) {
-      alert("No business linked");
-      return;
-    }
-
-    const BUSINESS_ID = businesses[0].id;
-
-    // FORM LINK
-    const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
-    document.getElementById("formLink").value = link;
-
-    // GET LEADS
-    const { data: leads, error: leadsError } = await supabaseClient
-      .from("Leads")
-      .select("*")
-      .eq("business_id", BUSINESS_ID)
-      .order("created_at", { ascending: false });
-
-    // GET INTERACTIONS
-    const { data: interactions, error: interError } = await supabaseClient
-      .from("interactions")
-      .select("*")
-      .eq("business_id", BUSINESS_ID);
-
-    if (leadsError || interError) {
-      console.error("Fetch error:", leadsError, interError);
-      return;
-    }
-
-    const table = document.getElementById("tableBody");
-    table.innerHTML = "";
-
-    const clean = p => (p || "").replace(/\D/g, "");
-
-    leads.forEach(lead => {
-      const interaction = interactions
-        .filter(i => clean(i.phone) === clean(lead.phone))
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-
-      const row = document.createElement("tr");
-
-      row.innerHTML = `
-        <td>${lead.name || ""}</td>
-        <td>${lead.phone || ""}</td>
-        <td>${lead.stage || ""}</td>
-        <td>${lead.category || ""}</td>
-        <td>${lead.exam || ""}</td>
-
-        <td>
-          <select onchange="updateStatus('${lead.id}', this.value)">
-            <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
-            <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
-            <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
-            <option ${lead.status === 'Converted' ? 'selected' : ''}>Converted</option>
-            <option ${lead.status === 'Dropped' ? 'selected' : ''}>Dropped</option>
-          </select>
-        </td>
-
-        <td>${interaction ? interaction.selection : "Not Selected"}</td>
-      `;
-
-      table.appendChild(row);
-    });
-
-  } catch (err) {
-    console.error("ERROR:", err);
+  if (!user) {
+    window.location.href = "/login.html";
+    return;
   }
+
+  document.getElementById("userInfo").innerText = "Logged in as: " + user.email;
+
+  const { data: biz } = await supabase
+    .from("Businesses")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!biz) {
+    alert("No business found");
+    return;
+  }
+
+  BUSINESS_ID = biz.id;
+
+  const link = `${window.location.origin}/form.html?biz=${BUSINESS_ID}`;
+  document.getElementById("formLink").value = link;
+
+  await loadData();
 }
 
-<!-- 🔥 DEBUG VERSION -->
-async function updateStatus(leadId, newStatus) {
-  console.log("UPDATING:", leadId, newStatus);
+// ================= LOAD DATA =================
+async function loadData() {
+  const { data: leads } = await supabase
+    .from("Leads")
+    .select("*")
+    .eq("business_id", BUSINESS_ID)
+    .order("created_at", { ascending: false });
 
-  const { data, error } = await supabaseClient
+  const { data: interactions } = await supabase
+    .from("interactions")
+    .select("*");
+
+  LEADS = leads || [];
+  INTERACTIONS = interactions || [];
+
+  render();
+}
+
+// ================= GROUP =================
+function groupLeads() {
+  const grouped = {
+    New: [],
+    Contacted: [],
+    Interested: [],
+    Converted: [],
+    Dropped: []
+  };
+
+  LEADS.forEach(l => {
+    const status = l.status || "New";
+    if (!grouped[status]) grouped[status] = [];
+    grouped[status].push(l);
+  });
+
+  return grouped;
+}
+
+// ================= INTERACTIONS =================
+function getLeadInteractions(leadId) {
+  return INTERACTIONS
+    .filter(i => i.lead_id === leadId)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+
+function getLastInteraction(leadId) {
+  const list = getLeadInteractions(leadId);
+  return list.length ? list[0] : null;
+}
+
+// ================= UPDATE STATUS =================
+async function updateStatus(leadId, newStatus) {
+  const { error } = await supabase
     .from("Leads")
     .update({ status: newStatus })
-    .eq("id", leadId)
-    .select();
-
-  console.log("RESULT:", data, error);
+    .eq("id", leadId);
 
   if (error) {
     alert("Failed to update status");
-    console.error(error);
+    return;
   }
+
+  await logInteraction(leadId, "status_change", newStatus);
+  await loadData();
 }
 
-// COPY
+// ================= LOG =================
+async function logInteraction(leadId, type, message = "") {
+  await supabase.from("interactions").insert([{
+    lead_id: leadId,
+    type,
+    message
+  }]);
+}
+
+// ================= WHATSAPP =================
+function triggerWhatsApp(lead) {
+  const msg = `Hi ${lead.name}, regarding your ${lead.exam || ""} preparation`;
+  const url = `https://wa.me/${lead.phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, "_blank");
+
+  logInteraction(lead.id, "whatsapp", "Sent WhatsApp message");
+}
+
+// ================= ADD NOTE =================
+async function addNote(leadId, note) {
+  if (!note) return;
+  await logInteraction(leadId, "note", note);
+  await loadData();
+}
+
+// ================= RENDER (GROUPED VERSION) =================
+function render() {
+  const table = document.getElementById("tableBody");
+  table.innerHTML = "";
+
+  const grouped = groupLeads();
+
+  const allLeads = [
+    ...grouped.New,
+    ...grouped.Contacted,
+    ...grouped.Interested,
+    ...grouped.Converted,
+    ...grouped.Dropped
+  ];
+
+  allLeads.forEach(lead => {
+    const last = getLastInteraction(lead.id);
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${lead.name || ""}</td>
+      <td>${lead.phone || ""}</td>
+      <td>${lead.stage || ""}</td>
+      <td>${lead.category || ""}</td>
+      <td>${lead.exam || ""}</td>
+
+      <td>
+        <select onchange="updateStatus('${lead.id}', this.value)">
+          <option ${lead.status === 'New' ? 'selected' : ''}>New</option>
+          <option ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
+          <option ${lead.status === 'Interested' ? 'selected' : ''}>Interested</option>
+          <option ${lead.status === 'Converted' ? 'selected' : ''}>Converted</option>
+          <option ${lead.status === 'Dropped' ? 'selected' : ''}>Dropped</option>
+        </select>
+      </td>
+
+      <td>${last ? last.type : "No Activity"}</td>
+    `;
+
+    table.appendChild(row);
+  });
+}
+
+// ================= COPY =================
 function copyLink() {
   const input = document.getElementById("formLink");
   input.select();
@@ -159,12 +220,20 @@ function copyLink() {
   alert("Link copied!");
 }
 
+// ================= LOGOUT =================
 async function logout() {
-  await supabaseClient.auth.signOut();
+  await supabase.auth.signOut();
   window.location.href = "/login.html";
 }
 
-fetchData();
+// ================= EXPOSE =================
+window.logout = logout;
+window.updateStatus = updateStatus;
+window.triggerWhatsApp = triggerWhatsApp;
+window.addNote = addNote;
+
+// ================= START =================
+init();
 </script>
 
 </body>

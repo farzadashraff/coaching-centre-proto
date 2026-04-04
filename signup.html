@@ -22,10 +22,20 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
+// ✅ AUTO REDIRECT IF ALREADY LOGGED IN
+(async () => {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (user) {
+    window.location.href = "/admin.html";
+  }
+})();
+
 document.getElementById("signupBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const msg = document.getElementById("msg");
+
+  msg.innerText = "Creating account...";
 
   const { data, error } = await supabaseClient.auth.signUp({
     email,
@@ -37,10 +47,15 @@ document.getElementById("signupBtn").onclick = async () => {
     return;
   }
 
-  // ✅ WAIT for session
+  // ✅ GET USER AFTER SIGNUP
   const { data: { user } } = await supabaseClient.auth.getUser();
 
-  // ✅ CREATE BUSINESS AUTOMATICALLY
+  if (!user) {
+    msg.innerText = "Signup successful. Please login.";
+    return;
+  }
+
+  // ✅ CREATE BUSINESS
   const { error: bizError } = await supabaseClient
     .from("Businesses")
     .insert([{
@@ -49,16 +64,13 @@ document.getElementById("signupBtn").onclick = async () => {
     }]);
 
   if (bizError) {
-    msg.innerText = "Signup done, but business creation failed";
     console.error(bizError);
+    msg.innerText = "Signup done, but business creation failed";
     return;
   }
 
-  msg.innerText = "Account ready! Redirecting...";
-
-  setTimeout(() => {
-    window.location.href = "/admin.html";
-  }, 1500);
+  // ✅ DIRECT REDIRECT (NO DELAY)
+  window.location.href = "/admin.html";
 };
 </script>
 

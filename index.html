@@ -1,33 +1,1803 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>FAZ Coaching</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fazz Stack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #141414;
+      --bg-2: #101010;
+      --bg-3: #1b1b1b;
+      --surface: rgba(255, 255, 255, 0.035);
+      --surface-2: rgba(255, 255, 255, 0.05);
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.14);
+      --text: #f3f0ea;
+      --muted: #a6a29a;
+      --gold: #dbc08c;
+      --gold-soft: rgba(219, 192, 140, 0.16);
+      --green: #7ce5a7;
+      --blue: #8fb7ff;
+      --danger: #ff9a8d;
+      --max: 1360px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      cursor: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(255,255,255,0.035), transparent 20%),
+        radial-gradient(circle at 88% 16%, rgba(219, 192, 140, 0.08), transparent 18%),
+        linear-gradient(180deg, #171717 0%, #131313 44%, #0f0f0f 100%);
+      font-family: "Inter", sans-serif;
+      overscroll-behavior: none;
+    }
+
+    body {
+      overflow: auto;
+      scrollbar-width: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(circle at center, black 22%, transparent 76%);
+      opacity: 0.28;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.04), transparent 10%);
+    }
+
+    a,
+    button {
+      cursor: none;
+    }
+
+    .cursor,
+    .cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor {
+      width: 16px;
+      height: 16px;
+      border: 1px solid rgba(255,255,255,0.34);
+      background: rgba(255,255,255,0.025);
+      backdrop-filter: blur(6px);
+      transition: width 180ms var(--ease), height 180ms var(--ease), border-color 180ms var(--ease), background 180ms var(--ease);
+    }
+
+    .cursor-dot {
+      width: 3px;
+      height: 3px;
+      background: var(--gold);
+      box-shadow: 0 0 12px rgba(219, 192, 140, 0.65);
+    }
+
+    .cursor.active {
+      width: 28px;
+      height: 28px;
+      border-color: rgba(219, 192, 140, 0.56);
+      background: rgba(219, 192, 140, 0.06);
+    }
+
+    .nav {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      width: min(calc(100% - 30px), var(--max));
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(18, 18, 18, 0.74);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      position: relative;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)),
+        linear-gradient(145deg, #252525, #161616 60%, #dbc08c);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .brand-mark::after {
+      content: "F";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .brand-copy strong,
+    .brand-copy span {
+      display: block;
+      line-height: 1.06;
+    }
+
+    .brand-copy strong {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-copy span {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: color 220ms var(--ease), transform 220ms var(--ease);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .nav-cta {
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #f0d9a7, #dbc08c);
+      color: #111 !important;
+      box-shadow: 0 16px 30px rgba(219, 192, 140, 0.14);
+    }
+
+    .progress {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 30;
+      display: grid;
+      gap: 10px;
+    }
+
+    .progress span {
+      width: 2px;
+      height: 48px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress span::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform-origin: top;
+      transform: scaleY(0);
+      background: linear-gradient(180deg, var(--gold), rgba(255,255,255,0.9));
+      transition: transform 500ms var(--ease);
+    }
+
+    .progress span.active::after {
+      transform: scaleY(1);
+    }
+
+    #smooth-root {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    #content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      will-change: transform;
+    }
+
+    .section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 110px 0 44px;
+    }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent 30%, transparent 70%, rgba(255,255,255,0.012));
+      opacity: 0.9;
+    }
+
+    .container {
+      width: min(calc(100% - 42px), var(--max));
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: #e6e3db;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 6px rgba(219, 192, 140, 0.08);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      letter-spacing: -0.06em;
+      line-height: 0.92;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .intro-layout {
+      min-height: calc(100vh - 152px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .intro-copy {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .intro-wordmark {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 800;
+      font-size: clamp(4.8rem, 16vw, 12rem);
+      letter-spacing: -0.08em;
+      line-height: 0.9;
+      color: #f3f0ea;
+      opacity: 0;
+      transform: scale(0.12);
+      filter: blur(18px);
+      animation: introWord 2.2s var(--ease) 0.15s forwards;
+    }
+
+    .intro-caption {
+      margin-top: 18px;
+      color: var(--gold);
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(24px);
+      animation: introCaption 1.4s var(--ease) 1s forwards;
+    }
+
+    .intro-sub {
+      max-width: 62ch;
+      margin: 28px auto 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.95;
+      opacity: 0;
+      transform: translateY(26px);
+      animation: introCaption 1.4s var(--ease) 1.2s forwards;
+    }
+
+    .scroll-cue {
+      margin-top: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0;
+      animation: introCaption 1.4s var(--ease) 1.35s forwards;
+    }
+
+    .scroll-cue::after {
+      content: "";
+      width: 54px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .hero-layout {
+      min-height: calc(100vh - 152px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-copy {
+      width: 100%;
+      text-align: center;
+    }
+
+    .hero-copy h1 {
+      margin-top: 24px;
+      font-size: clamp(4.6rem, 10.8vw, 8.4rem);
+    }
+
+    .hero-copy h1 span {
+      display: block;
+      color: var(--gold);
+    }
+
+    .hero-lead {
+      max-width: 82ch;
+      margin: 30px auto 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.96;
+    }
+
+    .hero-outcomes {
+      margin-top: 26px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-outcomes span {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: #f0ede7;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .hero-actions {
+      margin-top: 34px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-actions button,
+    .final-actions button,
+    .demo-step {
+      border: 0;
+      min-height: 54px;
+      padding: 0 22px;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 700;
+      transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #f0d9a7, #dbc08c);
+      color: #111;
+      box-shadow: 0 18px 34px rgba(219, 192, 140, 0.14);
+    }
+
+    .secondary-btn {
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border: 1px solid var(--line-strong);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover,
+    .demo-step:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-signals,
+    .pain-grid,
+    .trust-grid,
+    .who-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 28px;
+      margin-top: 76px;
+    }
+
+    .signal,
+    .pain-card,
+    .trust-card,
+    .who-card {
+      position: relative;
+      padding-top: 18px;
+    }
+
+    .signal::before,
+    .pain-card::before,
+    .trust-card::before,
+    .who-card::before,
+    .detail-item::before,
+    .case-study::before,
+    .team-line::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .signal small,
+    .pain-card small,
+    .trust-card small,
+    .who-card small {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .signal strong,
+    .pain-card strong,
+    .trust-card strong,
+    .who-card strong {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 1.5rem;
+      letter-spacing: -0.05em;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    .signal p,
+    .pain-card p,
+    .trust-card p,
+    .who-card p {
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.86;
+      max-width: 34ch;
+    }
+
+    .center-head {
+      max-width: 1020px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .center-head h2,
+    .big-copy h2,
+    .team-copy h2,
+    .final-cta h2 {
+      margin-top: 18px;
+      font-size: clamp(2.9rem, 6vw, 5.8rem);
+    }
+
+    .center-head p,
+    .big-copy p,
+    .team-copy p,
+    .final-cta p {
+      margin-top: 22px;
+      color: var(--muted);
+      line-height: 1.96;
+      font-size: 1rem;
+      max-width: 78ch;
+    }
+
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 30px;
+    }
+
+    .detail-item {
+      position: relative;
+      padding-top: 18px;
+    }
+
+    .detail-item h3 {
+      margin-bottom: 10px;
+      font-size: 1.45rem;
+    }
+
+    .detail-item p {
+      color: var(--muted);
+      line-height: 1.9;
+      max-width: 58ch;
+    }
+
+    .demo-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 40px;
+      align-items: center;
+      margin-top: 42px;
+    }
+
+    .demo-steps {
+      display: grid;
+      gap: 14px;
+    }
+
+    .demo-step {
+      min-height: 0;
+      padding: 18px 20px;
+      text-align: left;
+      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .demo-step.active {
+      border-color: rgba(219, 192, 140, 0.34);
+      background: rgba(219, 192, 140, 0.08);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .demo-step strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      letter-spacing: -0.03em;
+    }
+
+    .demo-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.7;
+    }
+
+    .demo-card {
+      position: relative;
+      padding: 24px;
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025)),
+        rgba(18,18,18,0.85);
+      border-radius: 28px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .demo-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -10% -18% 48%;
+      height: 220px;
+      background: radial-gradient(circle, rgba(219, 192, 140, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .demo-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .demo-top small {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .demo-top h3 {
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+      margin-bottom: 10px;
+    }
+
+    .demo-top p {
+      color: var(--muted);
+      line-height: 1.84;
+      max-width: 48ch;
+    }
+
+    .demo-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(124, 229, 167, 0.12);
+      border: 1px solid rgba(124, 229, 167, 0.2);
+      color: #dffbea;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .demo-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .demo-panel {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .demo-panel h4 {
+      margin-bottom: 14px;
+      font-size: 1rem;
+      letter-spacing: -0.03em;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    .demo-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .demo-list div {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      color: #f0ede7;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .demo-metric {
+      margin-top: 16px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .demo-metric strong {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: -0.07em;
+    }
+
+    .demo-metric span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .how-grid,
+    .case-grid,
+    .team-lines,
+    .contact-strip {
+      margin-top: 44px;
+      display: grid;
+      gap: 28px;
+    }
+
+    .how-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .how-step {
+      position: relative;
+      padding-top: 22px;
+    }
+
+    .how-step::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 90px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .how-step .index {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--gold);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .how-step h3 {
+      margin-bottom: 10px;
+      font-size: 1.35rem;
+    }
+
+    .how-step p {
+      color: var(--muted);
+      line-height: 1.85;
+    }
+
+    .trust-grid,
+    .who-grid {
+      margin-top: 42px;
+    }
+
+    .who-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .case-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .case-study {
+      position: relative;
+      padding-top: 24px;
+    }
+
+    .case-study .label {
+      display: inline-block;
+      margin-bottom: 12px;
+      color: var(--gold);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .case-study h3 {
+      margin-bottom: 12px;
+      font-size: 1.45rem;
+    }
+
+    .case-study p {
+      margin-bottom: 16px;
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    .case-study strong {
+      display: block;
+      color: #f0ede7;
+      font-size: 0.98rem;
+      line-height: 1.76;
+    }
+
+    .team-layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .team-lines {
+      margin-top: 8px;
+    }
+
+    .team-line {
+      position: relative;
+      padding-top: 20px;
+    }
+
+    .team-line span {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--gold);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .team-line h3 {
+      margin-bottom: 10px;
+      font-size: 1.56rem;
+    }
+
+    .team-line p {
+      color: var(--muted);
+      line-height: 1.9;
+      max-width: 58ch;
+    }
+
+    .final-cta {
+      max-width: 1080px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .final-actions {
+      margin-top: 34px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .contact-strip {
+      padding-top: 24px;
+      border-top: 1px solid var(--line-strong);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      text-align: left;
+    }
+
+    .contact-strip div small {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--gold);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .contact-strip div strong,
+    .contact-strip div a {
+      color: #f1ede7;
+      text-decoration: none;
+      font-size: 1.06rem;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(calc(100% - 42px), var(--max));
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.8;
+      z-index: 2;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(34px);
+      filter: blur(10px);
+      transition: opacity 1000ms var(--ease), transform 1000ms var(--ease), filter 1000ms var(--ease);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    @keyframes introWord {
+      0% {
+        opacity: 0;
+        transform: scale(0.12);
+        filter: blur(24px);
+        letter-spacing: -0.15em;
+      }
+      55% {
+        opacity: 1;
+        transform: scale(1.04);
+        filter: blur(0);
+        letter-spacing: -0.08em;
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+        letter-spacing: -0.08em;
+      }
+    }
+
+    @keyframes introCaption {
+      from {
+        opacity: 0;
+        transform: translateY(26px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1100px) {
+      * {
+        cursor: auto;
+      }
+
+      .cursor,
+      .cursor-dot,
+      .progress {
+        display: none;
+      }
+
+      #smooth-root {
+        position: relative;
+        overflow: visible;
+      }
+
+      #content {
+        position: relative;
+        transform: none !important;
+      }
+
+      .hero-signals,
+      .pain-grid,
+      .trust-grid,
+      .who-grid,
+      .split-layout,
+      .demo-layout,
+      .how-grid,
+      .case-grid,
+      .team-layout,
+      .contact-strip,
+      .client-ribbon {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        min-height: auto;
+        padding: 120px 0 74px;
+      }
+
+      .footer {
+        position: static;
+        transform: none;
+        margin: 0 auto 30px;
+      }
+
+      body {
+        overflow: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .nav {
+        width: min(calc(100% - 20px), var(--max));
+        border-radius: 26px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .container {
+        width: min(calc(100% - 20px), var(--max));
+      }
+
+      .intro-wordmark {
+        font-size: clamp(3.8rem, 18vw, 7rem);
+      }
+
+      .hero-copy h1 {
+        font-size: clamp(3.7rem, 16vw, 6.4rem);
+      }
+
+      .hero-actions,
+      .final-actions {
+        flex-direction: column;
+      }
+
+      .hero-actions button,
+      .final-actions button {
+        width: 100%;
+      }
+
+      .contact-strip {
+        text-align: center;
+      }
+
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
 
-<h1>Welcome to FAZ Coaching</h1>
+  <nav class="nav">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-copy">
+        <strong>Fazz Stack</strong>
+        <span>Get more leads. Convert faster. Automate follow-ups.</span>
+      </div>
+    </div>
 
-<p>
-  FAZ Coaching is a modern SaaS platform designed for coaching centers to manage student inquiries,
-  streamline lead capture, and build a professional digital presence.
-</p>
+    <div class="nav-links">
+      <a href="#intro">Intro</a>
+      <a href="#welcome">Platform</a>
+      <a href="#demo">Demo</a>
+      <a href="#how">How It Works</a>
+      <a href="#contact">Contact</a>
+      <a href="/login.html">Login</a>
+      <a href="/signup.html" class="nav-cta">Try Fazz Stack</a>
+    </div>
+  </nav>
 
-<p>
-  Create your coaching system, manage your leads, and scale your operations with a clean and powerful interface.
-</p>
+  <div class="progress">
+    <span class="active"></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
-<br><br>
+  <div id="smooth-root">
+    <main id="content">
+      <section class="section" id="intro">
+        <div class="container">
+          <div class="intro-layout">
+            <div class="intro-copy">
+              <div class="intro-wordmark">Fazz Stack</div>
+              <div class="intro-caption">Get more leads. Convert students faster. Automate follow-ups.</div>
+              <div class="intro-sub">
+                Fazz Stack gives online coaching centres one place to capture student inquiries, follow up automatically,
+                track conversions, reduce manual work, and run daily admissions flow without chaos.
+              </div>
+              <div class="scroll-cue">Scroll To Enter</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-<!-- ✅ PRIMARY ACTIONS -->
-<button onclick="window.location.href='/login.html'">Login</button>
+      <section class="section" id="welcome">
+        <div class="container">
+          <div class="hero-layout">
+            <div class="hero-copy reveal">
+              <div class="eyebrow">Welcome To Fazz Stack</div>
+              <h1>Turn messy student inquiries<span>into a clean admissions pipeline.</span></h1>
+              <p class="hero-lead">
+                If your leads are scattered across WhatsApp, calls, spreadsheets, and random forms, Fazz Stack brings them into one system.
+                Capture every inquiry, trigger follow-ups faster, see who converts, and give your team a simpler way to work every day.
+              </p>
 
-<button onclick="window.location.href='/signup.html'">Sign Up</button>
+              <div class="hero-outcomes">
+                <span>Capture every inquiry automatically</span>
+                <span>Track WhatsApp follow-ups</span>
+                <span>See which leads convert</span>
+                <span>Start in minutes, not weeks</span>
+              </div>
 
-<br><br>
+              <div class="hero-actions">
+                <button class="primary-btn" onclick="window.location.href='/signup.html'">Start Free Flow</button>
+                <button class="secondary-btn" onclick="window.location.href='/login.html'">Login To Dashboard</button>
+              </div>
 
-<p>
-  Already a client? Login to access your dashboard and share your student form.
-</p>
+              <div class="hero-signals">
+                <div class="signal">
+                  <small>More Leads</small>
+                  <strong>Stop losing inquiries.</strong>
+                  <p>Every student form submission enters a trackable system instead of disappearing into chats, calls, or memory.</p>
+                </div>
+                <div class="signal">
+                  <small>Faster Conversions</small>
+                  <strong>Follow up before interest drops.</strong>
+                  <p>Move from delayed manual follow-ups to a cleaner flow that helps your team respond quickly and consistently.</p>
+                </div>
+                <div class="signal">
+                  <small>Less Manual Work</small>
+                  <strong>Keep your team aligned.</strong>
+                  <p>Give staff one simple place to see new leads, next actions, and what is converting without confusion.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      <section class="section" id="pain">
+        <div class="container">
+          <div class="center-head reveal">
+            <div class="eyebrow">Why Owners Switch</div>
+            <h2>Real coaching pain, translated into clear business outcomes.</h2>
+            <p>
+              Owners do not buy software because it feels modern. They buy because it saves time, reduces missed admissions,
+              makes the team faster, and creates a simpler daily flow.
+            </p>
+          </div>
+
+          <div class="pain-grid">
+            <div class="pain-card reveal">
+              <small>The Problem</small>
+              <strong>Leads are scattered everywhere.</strong>
+              <p>WhatsApp, calls, Google Forms, and spreadsheets create messy intake and make serious inquiries hard to track.</p>
+            </div>
+            <div class="pain-card reveal">
+              <small>The Cost</small>
+              <strong>Follow-ups get missed.</strong>
+              <p>When a student is not contacted quickly, interest drops and admissions are lost without anyone noticing in time.</p>
+            </div>
+            <div class="pain-card reveal">
+              <small>The Fix</small>
+              <strong>One flow, one dashboard, one team rhythm.</strong>
+              <p>Fazz Stack helps capture inquiries, follow up faster, and show which leads are moving so your staff can act with clarity.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="demo">
+        <div class="container">
+          <div class="center-head reveal">
+            <div class="eyebrow">Try The Product Now</div>
+            <h2>See how a student enters your system and how your team works from there.</h2>
+            <p>
+              This is the exact daily flow owners want to visualise before signing up:
+              student submits, follow-up happens, lead gets tracked, and the team sees what to do next.
+            </p>
+          </div>
+
+          <div class="demo-layout">
+            <div class="demo-steps reveal">
+              <button class="demo-step active" data-step="0">
+                <strong>Step 1: Share your form</strong>
+                <span>Send your student inquiry link through WhatsApp, Instagram, ads, or your website.</span>
+              </button>
+              <button class="demo-step" data-step="1">
+                <strong>Step 2: Student submits</strong>
+                <span>The student enters their name, phone, stage, course interest, and exam intent.</span>
+              </button>
+              <button class="demo-step" data-step="2">
+                <strong>Step 3: Follow-up triggers</strong>
+                <span>Your team gets the lead fast and the next communication step becomes clear immediately.</span>
+              </button>
+              <button class="demo-step" data-step="3">
+                <strong>Step 4: Track inside dashboard</strong>
+                <span>See status, response, and conversion progress without hunting across apps and spreadsheets.</span>
+              </button>
+            </div>
+
+            <div class="demo-card reveal">
+              <div class="demo-top">
+                <div>
+                  <small id="demoLabel">Live Product Preview</small>
+                  <h3 id="demoTitle">Share your student form anywhere</h3>
+                  <p id="demoText">Start with a single form link your team can drop into WhatsApp, social media, website pages, and ad campaigns.</p>
+                </div>
+                <div class="demo-badge" id="demoBadge">Start in minutes</div>
+              </div>
+
+              <div class="demo-grid">
+                <div class="demo-panel">
+                  <h4 id="demoPanelTitle">What the student sees</h4>
+                  <div class="demo-list" id="demoLeftList">
+                    <div>Student inquiry form with course and exam details</div>
+                    <div>Mobile-friendly input flow</div>
+                    <div>Clear next step after submission</div>
+                  </div>
+                </div>
+
+                <div class="demo-panel">
+                  <h4 id="demoPanelTitleRight">What your team gets</h4>
+                  <div class="demo-list" id="demoRightList">
+                    <div>One shareable intake link</div>
+                    <div>Consistent lead capture source</div>
+                    <div>Cleaner incoming student pipeline</div>
+                  </div>
+
+                  <div class="demo-metric">
+                    <strong id="demoMetric">1 link</strong>
+                    <span id="demoMetricText">used across your lead sources</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how">
+        <div class="container">
+          <div class="center-head reveal">
+            <div class="eyebrow">How It Works</div>
+            <h2>A simple system your team can understand without training headaches.</h2>
+            <p>
+              The goal is not to replace everything with complexity. The goal is to give your staff a clean flow that fits into how admissions already work.
+            </p>
+          </div>
+
+          <div class="how-grid">
+            <div class="how-step reveal">
+              <span class="index">Step 1</span>
+              <h3>Share your form</h3>
+              <p>Use one student inquiry form across WhatsApp, website, campaigns, and existing outreach.</p>
+            </div>
+            <div class="how-step reveal">
+              <span class="index">Step 2</span>
+              <h3>Student submits</h3>
+              <p>The lead enters your system with course intent, stage, and contact details already organised.</p>
+            </div>
+            <div class="how-step reveal">
+              <span class="index">Step 3</span>
+              <h3>Follow-up becomes immediate</h3>
+              <p>Your team knows what came in, what to reply to, and what needs action before the lead goes cold.</p>
+            </div>
+            <div class="how-step reveal">
+              <span class="index">Step 4</span>
+              <h3>Track and convert</h3>
+              <p>See who responded, what is converting, and where your admissions process is leaking time or opportunity.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="trust">
+        <div class="container">
+          <div class="center-head reveal">
+            <div class="eyebrow">Trust And Fit</div>
+            <h2>Built to fit the tools you already use and the risks you already worry about.</h2>
+            <p>
+              Owners care about stability, privacy, messaging safety, ease of setup, and whether the product fits into current workflow.
+              Fazz Stack is positioned around those exact questions.
+            </p>
+          </div>
+
+          <div class="trust-grid">
+            <div class="trust-card reveal">
+              <small>Security</small>
+              <strong>Built on secure cloud infrastructure.</strong>
+              <p>Your lead data should stay private, dependable, and accessible to the right people without creating operational anxiety.</p>
+            </div>
+            <div class="trust-card reveal">
+              <small>Workflow Fit</small>
+              <strong>Works with WhatsApp, Excel, and your current process.</strong>
+              <p>You do not need to throw away the way your team works. Fazz Stack helps organise it into a clearer system.</p>
+            </div>
+            <div class="trust-card reveal">
+              <small>Simplicity</small>
+              <strong>Simple enough to adopt fast.</strong>
+              <p>The product is meant to feel understandable, low-friction, and usable by staff without an ERP-style learning curve.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="users">
+        <div class="container">
+          <div class="center-head reveal">
+            <div class="eyebrow">Built For</div>
+            <h2>Designed for coaching businesses that actually live in admission chaos.</h2>
+            <p>
+              This platform is for institutions that manage high-intent student leads every day and need a more reliable way to capture, follow up, and convert.
+            </p>
+          </div>
+
+          <div class="who-grid">
+            <div class="who-card reveal">
+              <small>NEET / Medical</small>
+              <strong>Track every serious inquiry.</strong>
+              <p>Stop losing NEET students to delayed callbacks and scattered lead sources.</p>
+            </div>
+            <div class="who-card reveal">
+              <small>JEE / Engineering</small>
+              <strong>Handle more demand cleanly.</strong>
+              <p>Keep student inquiries organised during high-volume admission periods and campaigns.</p>
+            </div>
+            <div class="who-card reveal">
+              <small>Civil Services</small>
+              <strong>Respond faster and convert better.</strong>
+              <p>Give your admissions team a more consistent way to handle serious UPSC and SSC leads.</p>
+            </div>
+            <div class="who-card reveal">
+              <small>Skills / Abroad / Language</small>
+              <strong>Use one flow across multiple programs.</strong>
+              <p>Run a cleaner student intake process even if your centre offers different categories and courses.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="team">
+        <div class="container">
+          <div class="team-layout">
+            <div class="team-copy reveal">
+              <div class="eyebrow">Our Team</div>
+              <h2>We specialise in vertical SaaS, world-class solution architecture, and a stronger cloud future.</h2>
+              <p>
+                Behind Fazz Stack is a team focused on building software that solves real coaching-centre pain:
+                messy lead capture, missed follow-ups, unclear conversions, slow internal response, and weak system visibility.
+                We work across SaaS development, cloud architecture, automation, and operational optimisation to create products that are powerful without feeling heavy.
+              </p>
+            </div>
+
+            <div class="team-lines">
+              <div class="team-line reveal">
+                <span>Industry Understanding</span>
+                <h3>Built by people who understand admissions workflows.</h3>
+                <p>We think in terms of leads, follow-ups, counseling, conversion bottlenecks, and team coordination, not generic software theory.</p>
+              </div>
+              <div class="team-line reveal">
+                <span>Automation Focus</span>
+                <h3>Reduce manual work wherever possible.</h3>
+                <p>We build with the goal of saving time, speeding up response, and making business operations feel lighter and more controlled.</p>
+              </div>
+              <div class="team-line reveal">
+                <span>Cloud Direction</span>
+                <h3>Prepared for deeper scale over time.</h3>
+                <p>Our architecture direction is designed to support stronger cloud-side growth, better resilience, and more serious long-term platform capability.</p>
+              </div>
+              <div class="team-line reveal">
+                <span>Support</span>
+                <h3>Available when clients need help.</h3>
+                <p>We stay close to the work and focus on building long-term product partnerships instead of delivering something and disappearing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="contact">
+        <div class="container">
+          <div class="final-cta reveal">
+            <div class="eyebrow">Contact Fazz Stack</div>
+            <h2>Start capturing leads today, reduce manual work, and give your team a system they can actually use.</h2>
+            <p>
+              Fazz Stack is built for coaching owners who want more admissions, faster follow-ups, cleaner visibility, and less daily chaos.
+              If you want a product that fits your real workflow and helps you see results quickly, this is where to start.
+            </p>
+
+            <div class="hero-outcomes" style="margin-top:22px;">
+              <span>Start in minutes</span>
+              <span>Fits into your current workflow</span>
+              <span>No heavy setup process</span>
+              <span>Built for real coaching teams</span>
+            </div>
+
+            <div class="final-actions">
+              <button class="primary-btn" onclick="window.location.href='/signup.html'">Try Fazz Stack</button>
+              <button class="secondary-btn" onclick="window.location.href='/login.html'">Client Login</button>
+            </div>
+
+            <div class="contact-strip">
+              <div>
+                <small>Email</small>
+                <a href="mailto:sonuash03@gmail.com">sonuash03@gmail.com</a>
+              </div>
+              <div>
+                <small>Phone</small>
+                <a href="tel:+919605005511">+91 9605005511</a>
+              </div>
+              <div>
+                <small>What You Gain</small>
+                <strong>More organised leads, faster team response, cleaner follow-up flow, and better visibility into admissions performance.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          Fazz Stack helps coaching businesses capture inquiries, automate follow-ups, track conversions, and run admissions with far less manual chaos.
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const root = document.getElementById("smooth-root");
+    const content = document.getElementById("content");
+    const sections = Array.from(document.querySelectorAll(".section"));
+    const revealEls = Array.from(document.querySelectorAll(".reveal"));
+    const progressBars = Array.from(document.querySelectorAll(".progress span"));
+    const cursor = document.querySelector(".cursor");
+    const dot = document.querySelector(".cursor-dot");
+    const hoverTargets = document.querySelectorAll("a, button");
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let cursorX = mouseX;
+    let cursorY = mouseY;
+    let dotX = mouseX;
+    let dotY = mouseY;
+
+    let currentScroll = 0;
+    let targetScroll = 0;
+    let maxScroll = 0;
+    const ease = 0.085;
+
+    function setBodyHeight() {
+      const height = content.getBoundingClientRect().height;
+      document.body.style.height = height + "px";
+      maxScroll = Math.max(0, height - window.innerHeight);
+      targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+    }
+
+    function updateReveal() {
+      revealEls.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.84 && rect.bottom > 0) {
+          el.classList.add("visible");
+        }
+      });
+    }
+
+    function updateProgress() {
+      let activeIndex = 0;
+      const pivot = window.innerHeight * 0.45;
+
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= pivot) {
+          activeIndex = index;
+        }
+      });
+
+      progressBars.forEach((bar, index) => {
+        bar.classList.toggle("active", index <= activeIndex);
+      });
+    }
+
+    function animateScroll() {
+      currentScroll += (targetScroll - currentScroll) * ease;
+
+      if (Math.abs(targetScroll - currentScroll) < 0.08) {
+        currentScroll = targetScroll;
+      }
+
+      content.style.transform = `translate3d(0, ${-currentScroll}px, 0)`;
+
+      updateReveal();
+      updateProgress();
+      animateCursor();
+
+      requestAnimationFrame(animateScroll);
+    }
+
+    function animateCursor() {
+      cursorX += (mouseX - cursorX) * 0.22;
+      cursorY += (mouseY - cursorY) * 0.22;
+      dotX += (mouseX - dotX) * 0.42;
+      dotY += (mouseY - dotY) * 0.42;
+
+      cursor.style.transform = `translate(${cursorX - 8}px, ${cursorY - 8}px)`;
+      dot.style.transform = `translate(${dotX - 1.5}px, ${dotY - 1.5}px)`;
+    }
+
+    function setScrollTarget(value) {
+      targetScroll = Math.max(0, Math.min(value, maxScroll));
+    }
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      document.body.style.setProperty("--mx", mouseX + "px");
+      document.body.style.setProperty("--my", mouseY + "px");
+    });
+
+    hoverTargets.forEach((el) => {
+      el.addEventListener("mouseenter", () => cursor.classList.add("active"));
+      el.addEventListener("mouseleave", () => cursor.classList.remove("active"));
+    });
+
+    window.addEventListener("wheel", (e) => {
+      if (window.innerWidth <= 1100) return;
+      e.preventDefault();
+      setScrollTarget(targetScroll + e.deltaY * 1.1);
+    }, { passive: false });
+
+    window.addEventListener("keydown", (e) => {
+      if (window.innerWidth <= 1100) return;
+
+      const step = window.innerHeight * 0.82;
+
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        setScrollTarget(targetScroll + step);
+      }
+
+      if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        setScrollTarget(targetScroll - step);
+      }
+
+      if (e.key === "Home") {
+        e.preventDefault();
+        setScrollTarget(0);
+      }
+
+      if (e.key === "End") {
+        e.preventDefault();
+        setScrollTarget(maxScroll);
+      }
+
+      if (e.key === " ") {
+        e.preventDefault();
+        setScrollTarget(targetScroll + step);
+      }
+    });
+
+    let touchStartY = 0;
+    let touchCurrentY = 0;
+
+    window.addEventListener("touchstart", (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchCurrentY = touchStartY;
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+      if (window.innerWidth <= 1100) return;
+      const y = e.touches[0].clientY;
+      const delta = touchCurrentY - y;
+      touchCurrentY = y;
+      setScrollTarget(targetScroll + delta * 1.35);
+    }, { passive: true });
+
+    document.querySelectorAll(".nav-links a[href^='#']").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const id = link.getAttribute("href");
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        setScrollTarget(target.offsetTop);
+      });
+    });
+
+    const demoData = [
+      {
+        label: "Live Product Preview",
+        title: "Share your student form anywhere",
+        text: "Use one inquiry link across WhatsApp, Instagram, ads, website pages, and counselor outreach so every lead enters the same system.",
+        badge: "Works with your current flow",
+        leftTitle: "What the student sees",
+        left: [
+          "Simple inquiry form with course and stage details",
+          "Fast mobile-friendly submission flow",
+          "Clear next step after form entry"
+        ],
+        rightTitle: "What your team gets",
+        right: [
+          "One shareable intake link",
+          "Consistent lead capture source",
+          "Cleaner incoming student pipeline"
+        ],
+        metric: "1 link",
+        metricText: "used across all lead sources"
+      },
+      {
+        label: "Live Product Preview",
+        title: "Student submits in seconds",
+        text: "The student fills the form once and your team instantly gets cleaner input instead of half-complete WhatsApp messages or missed calls.",
+        badge: "No messy manual intake",
+        leftTitle: "Captured fields",
+        left: [
+          "Student name and phone",
+          "Academic stage and category",
+          "Exam or course interest"
+        ],
+        rightTitle: "Why it matters",
+        right: [
+          "Less back-and-forth with leads",
+          "Better counseling context instantly",
+          "Fewer missed admissions chances"
+        ],
+        metric: "100%",
+        metricText: "of submitted fields captured together"
+      },
+      {
+        label: "Live Product Preview",
+        title: "Follow-up becomes immediate",
+        text: "Instead of relying on memory, slips, or delayed callbacks, your team can see what came in and act while student interest is still high.",
+        badge: "Faster response flow",
+        leftTitle: "What happens next",
+        left: [
+          "Lead appears in the system",
+          "Next communication step is clear",
+          "WhatsApp follow-up can be triggered faster"
+        ],
+        rightTitle: "Operational gain",
+        right: [
+          "Less follow-up delay",
+          "More consistent counselor response",
+          "Better conversion discipline"
+        ],
+        metric: "24 hrs",
+        metricText: "to start seeing better response flow"
+      },
+      {
+        label: "Live Product Preview",
+        title: "Track status inside one dashboard",
+        text: "See which leads are new, who responded, where conversion stands, and where your admissions process is getting stuck.",
+        badge: "Clear conversion visibility",
+        leftTitle: "Dashboard view",
+        left: [
+          "New leads and response status",
+          "Lead stage and follow-up activity",
+          "Better visibility for the whole team"
+        ],
+        rightTitle: "Business result",
+        right: [
+          "Know what is converting",
+          "Spot leaks in the funnel",
+          "Manage team action more clearly"
+        ],
+        metric: "1 view",
+        metricText: "for tracking admission flow"
+      }
+    ];
+
+    const demoStepButtons = Array.from(document.querySelectorAll(".demo-step"));
+    const demoLabel = document.getElementById("demoLabel");
+    const demoTitle = document.getElementById("demoTitle");
+    const demoText = document.getElementById("demoText");
+    const demoBadge = document.getElementById("demoBadge");
+    const demoPanelTitle = document.getElementById("demoPanelTitle");
+    const demoPanelTitleRight = document.getElementById("demoPanelTitleRight");
+    const demoLeftList = document.getElementById("demoLeftList");
+    const demoRightList = document.getElementById("demoRightList");
+    const demoMetric = document.getElementById("demoMetric");
+    const demoMetricText = document.getElementById("demoMetricText");
+
+    function renderDemo(index) {
+      const data = demoData[index];
+
+      demoLabel.textContent = data.label;
+      demoTitle.textContent = data.title;
+      demoText.textContent = data.text;
+      demoBadge.textContent = data.badge;
+      demoPanelTitle.textContent = data.leftTitle;
+      demoPanelTitleRight.textContent = data.rightTitle;
+      demoMetric.textContent = data.metric;
+      demoMetricText.textContent = data.metricText;
+
+      demoLeftList.innerHTML = data.left.map((item) => `<div>${item}</div>`).join("");
+      demoRightList.innerHTML = data.right.map((item) => `<div>${item}</div>`).join("");
+
+      demoStepButtons.forEach((btn, btnIndex) => {
+        btn.classList.toggle("active", btnIndex === index);
+      });
+    }
+
+    demoStepButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        renderDemo(Number(btn.dataset.step));
+      });
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth <= 1100) {
+        document.body.style.height = "auto";
+        content.style.transform = "none";
+        return;
+      }
+
+      setBodyHeight();
+    });
+
+    window.addEventListener("load", () => {
+      renderDemo(0);
+      setBodyHeight();
+      updateReveal();
+      updateProgress();
+    });
+
+    if (window.innerWidth > 1100) {
+      setBodyHeight();
+      animateScroll();
+    } else {
+      document.body.style.height = "auto";
+      root.style.position = "relative";
+      root.style.overflow = "visible";
+      content.style.position = "relative";
+      content.style.transform = "none";
+      renderDemo(0);
+      updateReveal();
+      updateProgress();
+    }
+    // ✅ AUTH CHECK + SMART CTA REDIRECT
+    (async () => {
+      const supabaseClient = window.supabase.createClient(
+        "https://xsdalnxweznnjzogyqaa.supabase.co",
+        "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
+      );
+
+      const { data: { user } } = await supabaseClient.auth.getUser();
+
+      if (user) {
+        const ctaButtons = document.querySelectorAll(".primary-btn");
+
+        ctaButtons.forEach(btn => {
+          btn.onclick = () => {
+            window.location.href = "/admin.html";
+          };
+        });
+      }
+    })();
+
+  </script>
 </body>
 </html>
