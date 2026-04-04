@@ -26,36 +26,40 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-// ✅ LOGIN
-document.getElementById("loginBtn").onclick = async () => {
-  console.log("Login clicked");
+// WAIT UNTIL PAGE LOADS (THIS IS WHAT YOU WERE MISSING)
+window.onload = () => {
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  console.log("JS loaded");
 
-  console.log("Email:", email);
-  console.log("Password:", password);
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    console.log("Login clicked");
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    console.log("Email:", email);
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    console.log("Response:", data, error);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    console.log("Login success");
+
+    window.location.href = "/admin.html";
   });
 
-  console.log("Response:", data, error);
+  document.getElementById("goSignup").addEventListener("click", () => {
+    window.location.href = "/signup.html";
+  });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  console.log("Login success");
-
-  window.location.href = "/admin.html";
-};
-
-// ✅ SIGNUP NAVIGATION (THIS WAS MISSING)
-document.getElementById("goSignup").onclick = () => {
-  window.location.href = "/signup.html";
 };
 </script>
 
