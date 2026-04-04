@@ -2,7 +2,11 @@
 <html>
 <head>
   <title>Login</title>
+
+  <!-- LOAD SUPABASE FIRST -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
 
 <h2>Login</h2>
@@ -15,41 +19,53 @@
 <p>Don't have an account?</p>
 <button id="goSignup">Sign Up</button>
 
-<!-- ✅ SUPABASE FIRST -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-<!-- ✅ YOUR SCRIPT AFTER -->
 <script>
-console.log("SCRIPT RUNNING");
+alert("JS START");
+
+console.log("Supabase:", window.supabase);
+
+if (!window.supabase) {
+  alert("SUPABASE NOT LOADED");
+}
 
 const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  console.log("CLICK WORKING");
+document.addEventListener("DOMContentLoaded", () => {
+  alert("DOM READY");
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const btn = document.getElementById("loginBtn");
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  console.log("RESULT:", data, error);
-
-  if (error) {
-    alert(error.message);
+  if (!btn) {
+    alert("BUTTON NOT FOUND");
     return;
   }
 
-  window.location.href = "/admin.html";
-});
+  btn.onclick = async () => {
+    alert("CLICK WORKS");
 
-document.getElementById("goSignup").addEventListener("click", () => {
-  window.location.href = "/signup.html";
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("LOGIN SUCCESS");
+    window.location.href = "/admin.html";
+  };
+
+  document.getElementById("goSignup").onclick = () => {
+    window.location.href = "/signup.html";
+  };
 });
 </script>
 
