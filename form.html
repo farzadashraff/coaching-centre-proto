@@ -895,13 +895,26 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
     phone = "91" + phone;
   }
 
-  // ✅ DEMO MODE (NO DATABASE INSERT)
+  // ✅ DEMO MODE
   if (BUSINESS_ID === "demo") {
     alert("Demo submitted! (not saved)");
     showWhatsApp();
     return;
   }
 
+  // ✅ ASSIGNMENT LOGIC (PLACE HERE)
+  const assignmentMap = {
+    "Engineering": "Employee 1",
+    "Medical": "Employee 1",
+    "Design": "Employee 2",
+    "Abroad": "Employee 2",
+    "Professional": "Employee 3",
+    "Government": "Employee 3"
+  };
+
+  const assignedPerson = assignmentMap[category] || "Admin";
+
+  // ✅ PAYLOAD (ONLY ONE)
   const payload = {
     name,
     phone,
@@ -909,7 +922,7 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
     category,
     exam,
     business_id: BUSINESS_ID,
-    assigned_to: "Admin"
+    assigned_to: assignedPerson
   };
 
   const { error } = await supabaseClient
@@ -924,7 +937,6 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
   alert("Form submitted successfully");
   showWhatsApp();
 });
-
 // ✅ WHATSAPP BUTTON LOGIC
 function showWhatsApp() {
   const btn = document.getElementById("whatsappBtn");
