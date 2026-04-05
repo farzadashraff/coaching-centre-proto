@@ -908,7 +908,8 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
     stage,
     category,
     exam,
-    business_id: BUSINESS_ID
+    business_id: BUSINESS_ID,
+    assigned_to: "Admin"
   };
 
   const { error } = await supabaseClient
