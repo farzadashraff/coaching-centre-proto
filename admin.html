@@ -239,7 +239,7 @@ function render(leads) {
         <input 
           value="${l.assigned_to || ""}" 
           placeholder="Assign..." 
-          onchange="updateAssigned('${l.id}', this.value)"
+          onblur="updateAssigned('${l.id}', this.value)"
         />
       </td>
     `;
@@ -411,6 +411,13 @@ async function updateStatus(id, newStatus) {
 }
 // ================= UPDATE ASSIGNED TO =================
 async function updateAssigned(id, value) {
+
+  // ✅ PREVENT EMPTY INPUT (YOU MISSED THIS)
+  if (!value.trim()) {
+    alert("Enter a name");
+    return;
+  }
+
   const { error } = await supabaseClient
     .from("Leads")
     .update({ assigned_to: value })
@@ -421,6 +428,9 @@ async function updateAssigned(id, value) {
     alert("Failed to assign");
     return;
   }
+
+  // ✅ SUCCESS FEEDBACK
+  alert("Assigned successfully");
 
   await supabaseClient
     .from("interactions")
