@@ -75,6 +75,9 @@
 <h3>Overdue Follow-ups</h3>
 <div id="overdueBox" style="border:2px solid red; padding:10px; margin-bottom:20px;"></div>
 
+<h3>📅 Today’s Follow-ups</h3>
+<div id="todayBox" style="border:2px solid orange; padding:10px; margin-bottom:20px;"></div>
+
 <div style="margin: 20px 0;">
   <strong>Your Student Form Link:</strong><br>
   <input id="formLink" style="width: 400px;" readonly />
@@ -209,6 +212,7 @@ render(ALL_LEADS);
 renderPipeline(ALL_LEADS);
 updateAnalytics(ALL_LEADS);
 renderOverdue(ALL_LEADS);
+renderToday(ALL_LEADS);
 }
 
 // ================= RENDER =================
@@ -420,7 +424,36 @@ function renderOverdue(leads) {
     box.appendChild(div);
   });
 }
+// ================= Render-Today =================
+function renderToday(leads) {
+  const box = document.getElementById("todayBox");
+  box.innerHTML = "";
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const todayLeads = leads.filter(l =>
+    l.next_followup_date === today
+  );
+
+  if (!todayLeads.length) {
+    box.innerHTML = "<span style='color:gray;'>No follow-ups today</span>";
+    return;
+  }
+
+  todayLeads.forEach(l => {
+    const div = document.createElement("div");
+    div.style.padding = "8px";
+    div.style.margin = "5px 0";
+    div.style.borderBottom = "1px solid #ccc";
+
+    div.innerHTML = `
+      <strong>${l.name}</strong> (${l.phone})<br>
+      📅 Today | 👤 ${l.assigned_to || "None"}
+    `;
+
+    box.appendChild(div);
+  });
+}
 // ================= APPLY FILTERS =================
 function applyFilters() {
   const searchValue = document.getElementById("searchInput").value.toLowerCase();
@@ -443,6 +476,7 @@ function applyFilters() {
 renderPipeline(filtered);
 updateAnalytics(filtered);
 renderOverdue(filtered);
+renderToday(filtered);
 }
 
 // ✅ ONLY ONE SET OF LISTENERS (FIXED)
