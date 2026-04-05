@@ -136,6 +136,7 @@
       <th>Exam</th>
       <th>Status</th>
       <th>Assigned To</th>
+      <th>Follow-up</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -208,10 +209,19 @@ function render(leads) {
   leads.forEach(l => {
     const row = document.createElement("tr");
 
+    // COLOR CODING
     if (l.status === "Converted") row.style.backgroundColor = "#d4edda";
     if (l.status === "Dropped") row.style.backgroundColor = "#f8d7da";
     if (l.status === "Interested") row.style.backgroundColor = "#fff3cd";
     if (l.status === "Contacted") row.style.backgroundColor = "#d1ecf1";
+
+    // FOLLOW-UP ALERT (RED BORDER)
+    if (l.next_followup_date) {
+      const today = new Date().toISOString().split("T")[0];
+      if (l.next_followup_date <= today) {
+        row.style.border = "2px solid red";
+      }
+    }
 
     row.innerHTML = `
       <td>${l.name || ""}</td>
@@ -240,6 +250,14 @@ function render(leads) {
           value="${l.assigned_to || ""}" 
           placeholder="Assign..." 
           onblur="updateAssigned('${l.id}', this.value)"
+        />
+      </td>
+
+      <td>
+        <input 
+          type="date"
+          value="${l.next_followup_date || ""}"
+          onchange="updateFollowUp('${l.id}', this.value)"
         />
       </td>
     `;
@@ -286,6 +304,7 @@ function renderPipeline(leads) {
   <strong>${l.name || "No Name"}</strong><br>
   <small>${l.phone || ""}</small><br>
   <small>👤 ${l.assigned_to || "Unassigned"}</small>
+  <small>📅 ${l.next_followup_date || "No follow-up"}</small>
   `;
 
     card.onmouseenter = () => {
@@ -439,6 +458,37 @@ async function updateAssigned(id, value) {
       type: "assignment",
       message: "Assigned to " + value
     }]);
+
+  await loadLeads();
+}
+// ================= UPDATE FOLLOW-UP =================
+async function updateFollowUp(id, date) {
+
+  if (!date) {
+    alert("Select a date");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("Leads")
+    .update({ next_followup_date: date })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to update follow-up");
+    return;
+  }
+
+  await supabaseClient
+    .from("interactions")
+    .insert([{
+      lead_id: id,
+      type: "followup",
+      message: "Follow-up set for " + date
+    }]);
+
+  alert("Follow-up saved");
 
   await loadLeads();
 }
