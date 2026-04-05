@@ -2,6 +2,13 @@
 <html>
 <head>
   <title>CRM Dashboard</title>
+  <style>
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+  </style>
 </head>
 <body>
 
@@ -215,13 +222,16 @@ function render(leads) {
     if (l.status === "Interested") row.style.backgroundColor = "#fff3cd";
     if (l.status === "Contacted") row.style.backgroundColor = "#d1ecf1";
 
-    // FOLLOW-UP ALERT (RED BORDER)
+    // FOLLOW-UP ALERT (HIGH PRIORITY VISUAL)
     if (l.next_followup_date) {
-      const today = new Date().toISOString().split("T")[0];
-      if (l.next_followup_date <= today) {
-        row.style.border = "2px solid red";
-      }
+        const today = new Date().toISOString().split("T")[0];
+
+    if (l.next_followup_date <= today) {
+        row.style.backgroundColor = "#ffcccc";
+        row.style.border = "3px solid #ff0000";
+        row.style.animation = "blink 1s infinite"; // 👈 HERE
     }
+}
 
     row.innerHTML = `
       <td>${l.name || ""}</td>
