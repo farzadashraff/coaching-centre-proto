@@ -189,34 +189,38 @@ async function init() {
     console.error(bizError);
     return;
   }
-}
+
+  // ✅ EVERYTHING BELOW MUST BE INSIDE INIT
 
   BUSINESS_ID = biz.id;
+
   supabaseClient
     .channel('leads-channel')
     .on(
-        'postgres_changes',
-        {
-            event: '*',
-            schema: 'public',
-            table: 'Leads',
-            filter: `business_id=eq.${BUSINESS_ID}`
-        },
-        () => {
-            loadLeads();
-        }
-    ) 
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'Leads',
+        filter: `business_id=eq.${BUSINESS_ID}`
+      },
+      () => {
+        loadLeads();
+      }
+    )
     .subscribe();
 
-    setFormLink();
-    loadLeads();
-// 🔥 START AUTOMATION LOOP
-    checkOverdueAndNotify(); // run instantly
+  setFormLink();
+  loadLeads();
 
-    setInterval(() => {
-        console.log("CHECK LOOP...");
-        checkOverdueAndNotify();
-},     60000);
+  // 🔥 AUTOMATION
+  checkOverdueAndNotify();
+
+  setInterval(() => {
+    console.log("CHECK LOOP...");
+    checkOverdueAndNotify();
+  }, 60000);
+}
 
 // ================= LOAD LEADS =================
 async function loadLeads() {
@@ -224,8 +228,8 @@ async function loadLeads() {
     .from("Leads")
     .select("*")
     .eq("business_id", BUSINESS_ID)
+    .lte("next_followup_date", today)
     .order("created_at", { ascending: false });
-
   if (error) {
     console.error(error);
     return;
@@ -681,7 +685,8 @@ async function checkOverdueAndNotify() {
   const { data: leads, error } = await supabaseClient
     .from("Leads")
     .select("*")
-    .eq("business_id", BUSINESS_ID);
+    .eq("business_id", BUSINESS_ID)
+    .lte("next_followup_date", today);
 
   if (error) {
     console.error("ERROR:", error);
@@ -694,9 +699,7 @@ async function checkOverdueAndNotify() {
   }
 
   leads.forEach(l => {
-    if (l.next_followup_date && l.next_followup_date <= today) {
-      console.log("REMINDER:", l.name, l.assigned_to);
-    }
+    console.log("REMINDER:", l.name, l.assigned_to);
   });
 }
 
