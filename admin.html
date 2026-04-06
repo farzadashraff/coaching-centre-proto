@@ -185,12 +185,12 @@ async function init() {
   const { data: { user } } = await supabaseClient.auth.getUser();
 
 if (!user) {
+  console.log("No user session");
   window.location.href = "/login.html";
   return;
 }
 
 console.log("USER ID:", user.id);
-
   document.getElementById("userInfo").innerText =
     "Logged in as: " + user.email;
 
