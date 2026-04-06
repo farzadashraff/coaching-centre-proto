@@ -72,10 +72,11 @@
   </div>
 
 </div>
-<h3>Overdue Follow-ups</h3>
+
+<h3>🔥 Overdue Follow-ups (<span id="overdueCount">0</span>)</h3>
 <div id="overdueBox" style="border:2px solid red; padding:10px; margin-bottom:20px;"></div>
 
-<h3>📅 Today’s Follow-ups</h3>
+<h3>📅 Today’s Follow-ups (<span id="todayCount">0</span>)</h3>
 <div id="todayBox" style="border:2px solid orange; padding:10px; margin-bottom:20px;"></div>
 
 <div style="margin: 20px 0;">
@@ -407,6 +408,7 @@ function renderOverdue(leads) {
 
   if (!overdue.length) {
     box.innerHTML = "<span style='color:green;'>No overdue follow-ups</span>";
+    document.getElementById("overdueCount").innerText = 0;
     return;
   }
 
@@ -416,19 +418,23 @@ function renderOverdue(leads) {
     div.style.margin = "5px 0";
     div.style.borderBottom = "1px solid #ccc";
 
+    div.style.background = "#ffe5e5";
+    div.style.borderLeft = "6px solid red";
+    div.style.fontWeight = "bold";
+
     div.innerHTML = `
   <strong>${l.name}</strong> (${l.phone})<br>
-  📅 ${l.next_followup_date} | 👤 ${l.assigned_to || "None"}
+  ⛔ OVERDUE (${l.next_followup_date}) | 👤 ${l.assigned_to || "None"}
 `;
 
     box.appendChild(div);
   });
+  document.getElementById("overdueCount").innerText = overdue.length;
 }
 // ================= Render-Today =================
 function renderToday(leads) {
   const box = document.getElementById("todayBox");
   box.innerHTML = "";
-
   const today = new Date().toISOString().split("T")[0];
 
   const todayLeads = leads.filter(l =>
@@ -436,23 +442,27 @@ function renderToday(leads) {
   );
 
   if (!todayLeads.length) {
-    box.innerHTML = "<span style='color:gray;'>No follow-ups today</span>";
-    return;
-  }
+  box.innerHTML = "<span style='color:gray;'>No follow-ups today</span>";
+  document.getElementById("todayCount").innerText = 0;
+  return;
+}
 
   todayLeads.forEach(l => {
     const div = document.createElement("div");
     div.style.padding = "8px";
     div.style.margin = "5px 0";
     div.style.borderBottom = "1px solid #ccc";
+    div.style.background = "#fff8e1";
+    div.style.borderLeft = "6px solid orange";
 
     div.innerHTML = `
       <strong>${l.name}</strong> (${l.phone})<br>
-      📅 Today | 👤 ${l.assigned_to || "None"}
+        ⚡ ACTION TODAY | 👤 ${l.assigned_to || "None"}
     `;
 
     box.appendChild(div);
   });
+  document.getElementById("todayCount").innerText = todayLeads.length;
 }
 // ================= APPLY FILTERS =================
 function applyFilters() {
