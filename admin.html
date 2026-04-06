@@ -9,6 +9,7 @@
       100% { opacity: 1; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -169,15 +170,22 @@
 const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
+  
 );
+emailjs.init("yXd_l1V_vUV7aRr8A");
+
+
 
 let ALL_LEADS = [];
 let BUSINESS_ID = null;
 let SHOWN = new Set();
+let USERS = {};
+const TAB_ID = Math.random().toString(36).substring(2);
 
 // ================= INIT =================
 async function init() {
   const { data: { user } } = await supabaseClient.auth.getUser();
+  console.log(user.id); //add this temporarily, remove it later 
 
   if (!user) {
     window.location.href = "/login.html";
@@ -202,6 +210,14 @@ async function init() {
   // ✅ EVERYTHING BELOW MUST BE INSIDE INIT
 
   BUSINESS_ID = biz.id;
+  await loadUsers();
+
+  const { data: users } = await supabaseClient
+  .from("Users")
+  .select("*")
+  .eq("business_id", BUSINESS_ID);
+
+USERS = users || [];
 
   supabaseClient
     .channel('leads-channel')
@@ -268,6 +284,25 @@ function showPopup(message) {
   `;
 
   document.getElementById("popupContainer").appendChild(box);
+
+  setTimeout(() => {
+  box.remove();
+}, 8000);
+}
+// ================= EMAIL REMINDER =================
+function sendEmailReminder(lead) {
+  emailjs.send("service_ogijt1c", "template_ofp1yt7", {
+    name: lead.name || "No Name",
+    assigned_to: lead.assigned_to || "Unassigned",
+    phone: lead.phone || "N/A"
+  })
+  .then(() => console.log("Email sent"))
+  .catch(err => console.error("Email error", err));
+}
+// ================= GET USER NAME =================
+function getUserName(userId) {
+  const user = USERS.find(u => u.id === userId);
+  return user ? user.name : "Unassigned";
 }
 // ================= RENDER =================
 function render(leads) {
@@ -317,12 +352,15 @@ function render(leads) {
       </td>
 
       <td>
-        <input 
-          value="${l.assigned_to || ""}" 
-          placeholder="Assign..." 
-          onblur="updateAssigned('${l.id}', this.value)"
-        />
-      </td>
+  <select onchange="updateAssigned('${l.id}', this.value)">
+    <option value="">Unassigned</option>
+    ${Object.values(USERS).map(u => `
+      <option value="${u.id}">
+        ${u.name}
+      </option>
+    `).join("")}
+  </select>
+</td>
 
       <td>
         <input 
@@ -366,7 +404,7 @@ function renderStuck(leads) {
 
     div.innerHTML = `
       <strong>${l.name}</strong> (${l.phone})<br>
-      ⚠️ STUCK IN NEW | 👤 ${l.assigned_to || "None"}
+      ⚠️ STUCK IN NEW | 👤 ${getUserName(USERS[l.assigned_to_user_id]?.name || "Unassigned")}
     `;
 
     box.appendChild(div);
@@ -410,7 +448,7 @@ function renderPipeline(leads) {
     card.innerHTML = `
   <strong>${l.name || "No Name"}</strong><br>
   <small>${l.phone || ""}</small><br>
-  <small>👤 ${l.assigned_to || "Unassigned"}</small>
+  <small>👤 ${getUserName(USERS[l.assigned_to_user_id]?.name || "Unassigned")}</small>
   <small>📅 ${l.next_followup_date || "No follow-up"}</small>
   `;
 
@@ -432,6 +470,23 @@ function renderPipeline(leads) {
     const status = l.status || "New";
     const column = document.getElementById("col-" + status);
     if (column) column.appendChild(card);
+  });
+}
+// ================= LOAD USERS =================
+async function loadUsers() {
+  const { data, error } = await supabaseClient
+    .from("Users")
+    .select("*")
+    .eq("business_id", BUSINESS_ID);
+
+  if (error) {
+    console.error("Error loading users:", error);
+    return;
+  }
+
+  USERS = {};
+  data.forEach(u => {
+    USERS[u.id] = u;
   });
 }
 
@@ -514,7 +569,7 @@ function renderOverdue(leads) {
 
     div.innerHTML = `
   <strong>${l.name}</strong> (${l.phone})<br>
-  ⛔ OVERDUE (${l.next_followup_date}) | 👤 ${l.assigned_to || "None"}
+  ⛔ OVERDUE (${l.next_followup_date}) | 👤 ${getUserName(USERS[l.assigned_to_user_id]?.name || "Unassigned")}
 `;
 
     box.appendChild(div);
@@ -547,7 +602,7 @@ function renderToday(leads) {
 
     div.innerHTML = `
       <strong>${l.name}</strong> (${l.phone})<br>
-        ⚡ ACTION TODAY | 👤 ${l.assigned_to || "None"}
+        👤 ${getUserName(USERS[l.assigned_to_user_id]?.name || "Unassigned")}
     `;
 
     box.appendChild(div);
@@ -610,14 +665,40 @@ async function updateStatus(id, newStatus) {
 async function updateAssigned(id, value) {
 
   // ✅ PREVENT EMPTY INPUT (YOU MISSED THIS)
-  if (!value.trim()) {
-    alert("Enter a name");
+  async function updateAssigned(id, userId) {
+
+  if (!userId) {
+    alert("Select a user");
     return;
   }
 
   const { error } = await supabaseClient
     .from("Leads")
-    .update({ assigned_to: value })
+    .update({ assigned_to: userId })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to assign");
+    return;
+  }
+
+  alert("Assigned successfully");
+
+  await supabaseClient
+    .from("interactions")
+    .insert([{
+      lead_id: id,
+      type: "assignment",
+      message: "Assigned to user ID " + userId
+    }]);
+
+  await loadLeads();
+}
+
+  const { error } = await supabaseClient
+    .from("Leads")
+    .update({ assigned_to_user_id: value })
     .eq("id", id);
 
   if (error) {
@@ -745,6 +826,7 @@ async function checkOverdueAndNotify() {
   // ✅ DAILY RESET
   if (!window.LAST_RUN_DATE || window.LAST_RUN_DATE !== today) {
     SHOWN.clear();
+    localStorage.clear(); // optional reset
     window.LAST_RUN_DATE = today;
   }
 
@@ -762,14 +844,25 @@ async function checkOverdueAndNotify() {
   if (!leads || leads.length === 0) return;
 
   leads.forEach(l => {
-    if (SHOWN.has(l.id)) return;
+  const key = "email-" + l.id;
 
-    showPopup(
-      `Follow-up overdue for ${l.name} (Assigned: ${l.assigned_to || "None"})`
-    );
+  // ✅ Prevent duplicate across tabs
+  if (localStorage.getItem(key)) return;
 
-    SHOWN.add(l.id);
-  });
+  // ✅ Prevent duplicate in same session
+  if (SHOWN.has(key)) return;
+
+  showPopup(
+    `Follow-up overdue for ${l.name} (Assigned: ${getUserName(USERS[l.assigned_to_user_id]?.name || "Unassigned")})`
+  );
+
+  sendEmailReminder(l);
+
+  SHOWN.add(key);
+
+  // ✅ Mark as sent globally
+  localStorage.setItem(key, TAB_ID);
+});
 
 }
 // ================= STUCK LEADS ALERT =================
@@ -788,7 +881,7 @@ function checkStuckLeads(leads) {
       if (SHOWN.has("stuck-" + l.id)) return;
 
       showPopup(
-        `Lead stuck in NEW for 2+ days: ${l.name} (Assigned: ${l.assigned_to || "None"})`
+        `Lead stuck in NEW for 2+ days: ${l.name} (Assigned: ${getUserName(USERS[l.assigned_to_user_id]?.name || "Unassigned")})`
       );
 
       SHOWN.add("stuck-" + l.id);
