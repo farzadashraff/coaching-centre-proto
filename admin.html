@@ -207,8 +207,12 @@ async function init() {
     ) 
     .subscribe();
 
-  setFormLink();
-  loadLeads();
+    setFormLink();
+    loadLeads();
+// 🔥 START AUTOMATION LOOP
+    setInterval(() => {
+        checkOverdueAndNotify();
+    },  60000); // every 60 sec
 }
 
 // ================= LOAD LEADS =================
@@ -663,6 +667,29 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   window.location.href = "/login.html";
 });
+// ================= AUTOMATION =================
+
+// OVERDUE CHECK
+async function checkOverdueAndNotify() {
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: leads } = await supabaseClient
+    .from("Leads")
+    .select("*")
+    .eq("business_id", BUSINESS_ID) // ✅ IMPORTANT FILTER
+    .lte("next_followup_date", today);
+
+  if (!leads) return;
+
+  for (let l of leads) {
+    await sendWhatsAppReminder(l);
+  }
+}
+
+// MOCK REMINDER (FOR NOW)
+async function sendWhatsAppReminder(lead) {
+  console.log("REMINDER:", lead.name, lead.assigned_to);
+}
 
 // ================= START =================
 init();
