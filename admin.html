@@ -189,6 +189,7 @@ async function init() {
     console.error(bizError);
     return;
   }
+}
 
   BUSINESS_ID = biz.id;
   supabaseClient
@@ -210,10 +211,12 @@ async function init() {
     setFormLink();
     loadLeads();
 // 🔥 START AUTOMATION LOOP
+    checkOverdueAndNotify(); // run instantly
+
     setInterval(() => {
+        console.log("CHECK LOOP...");
         checkOverdueAndNotify();
-    },  60000); // every 60 sec
-}
+},     60000);
 
 // ================= LOAD LEADS =================
 async function loadLeads() {
@@ -671,19 +674,30 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
 // OVERDUE CHECK
 async function checkOverdueAndNotify() {
+  console.log("RUNNING CHECK...");
+
   const today = new Date().toISOString().split("T")[0];
 
-  const { data: leads } = await supabaseClient
+  const { data: leads, error } = await supabaseClient
     .from("Leads")
     .select("*")
-    .eq("business_id", BUSINESS_ID) // ✅ IMPORTANT FILTER
-    .lte("next_followup_date", today);
+    .eq("business_id", BUSINESS_ID);
 
-  if (!leads) return;
-
-  for (let l of leads) {
-    await sendWhatsAppReminder(l);
+  if (error) {
+    console.error("ERROR:", error);
+    return;
   }
+
+  if (!leads || leads.length === 0) {
+    console.log("NO LEADS");
+    return;
+  }
+
+  leads.forEach(l => {
+    if (l.next_followup_date && l.next_followup_date <= today) {
+      console.log("REMINDER:", l.name, l.assigned_to);
+    }
+  });
 }
 
 // MOCK REMINDER (FOR NOW)
