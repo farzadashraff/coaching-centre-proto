@@ -12,6 +12,13 @@
 </head>
 <body>
 
+<div id="popupContainer" style="
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+"></div>
+
 <h2>Leads Dashboard</h2>
 <div style="margin:20px 0; padding:15px; border:1px solid #ccc;">
 
@@ -165,6 +172,7 @@ const supabaseClient = window.supabase.createClient(
 
 let ALL_LEADS = [];
 let BUSINESS_ID = null;
+let SHOWN = new Set();
 
 // ================= INIT =================
 async function init() {
@@ -213,13 +221,10 @@ async function init() {
   setFormLink();
   loadLeads();
 
-  // 🔥 AUTOMATION
-  checkOverdueAndNotify();
-
   setInterval(() => {
-    console.log("CHECK LOOP...");
-    checkOverdueAndNotify();
-  }, 60000);
+  console.log("CHECK LOOP...");
+  loadLeads();
+}, 60000);
 }
 
 // ================= LOAD LEADS =================
@@ -240,8 +245,26 @@ renderPipeline(ALL_LEADS);
 updateAnalytics(ALL_LEADS);
 renderOverdue(ALL_LEADS);
 renderToday(ALL_LEADS);
+checkOverdueAndNotify();
 }
+// ================= POPUP =================
+function showPopup(message) {
+  const box = document.createElement("div");
 
+  box.style.background = "#ffcccc";
+  box.style.borderLeft = "6px solid red";
+  box.style.padding = "12px";
+  box.style.marginBottom = "10px";
+  box.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+  box.style.borderRadius = "6px";
+
+  box.innerHTML = `
+    <strong>${message}</strong><br>
+    <button onclick="this.parentElement.remove()">Close</button>
+  `;
+
+  document.getElementById("popupContainer").appendChild(box);
+}
 // ================= RENDER =================
 function render(leads) {
   const table = document.getElementById("tableBody");
@@ -674,12 +697,16 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   window.location.href = "/login.html";
 });
 // ================= AUTOMATION =================
-
-// OVERDUE CHECK
 async function checkOverdueAndNotify() {
   console.log("RUNNING CHECK...");
 
   const today = new Date().toISOString().split("T")[0];
+
+  // ✅ DAILY RESET
+  if (!window.LAST_RUN_DATE || window.LAST_RUN_DATE !== today) {
+    SHOWN.clear();
+    window.LAST_RUN_DATE = today;
+  }
 
   const { data: leads, error } = await supabaseClient
     .from("Leads")
@@ -692,19 +719,17 @@ async function checkOverdueAndNotify() {
     return;
   }
 
-  if (!leads || leads.length === 0) {
-    console.log("NO LEADS");
-    return;
-  }
+  if (!leads || leads.length === 0) return;
 
   leads.forEach(l => {
-    console.log("REMINDER:", l.name, l.assigned_to);
-  });
-}
+    if (SHOWN.has(l.id)) return;
 
-// MOCK REMINDER (FOR NOW)
-async function sendWhatsAppReminder(lead) {
-  console.log("REMINDER:", lead.name, lead.assigned_to);
+    showPopup(
+      `Follow-up overdue for ${l.name} (Assigned: ${l.assigned_to || "None"})`
+    );
+
+    SHOWN.add(l.id);
+  });
 }
 
 // ================= START =================
