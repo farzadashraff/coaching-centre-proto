@@ -82,7 +82,8 @@
 
 <h3>🔥 Overdue Follow-ups (<span id="overdueCount">0</span>)</h3>
 <div id="overdueBox" style="border:2px solid red; padding:10px; margin-bottom:20px;"></div>
-
+<h3>⚠️ Stuck Leads (2+ days)</h3>
+<div id="stuckBox" style="border:2px solid purple; padding:10px; margin-bottom:20px;"></div>
 <h3>📅 Today’s Follow-ups (<span id="todayCount">0</span>)</h3>
 <div id="todayBox" style="border:2px solid orange; padding:10px; margin-bottom:20px;"></div>
 
@@ -246,6 +247,9 @@ updateAnalytics(ALL_LEADS);
 renderOverdue(ALL_LEADS);
 renderToday(ALL_LEADS);
 checkOverdueAndNotify();
+checkStuckLeads(ALL_LEADS);
+renderStuck(ALL_LEADS);
+
 }
 // ================= POPUP =================
 function showPopup(message) {
@@ -330,6 +334,42 @@ function render(leads) {
     `;
 
     table.appendChild(row);
+  });
+}
+// ================= STUCK LEADS CHECK =================
+function renderStuck(leads) {
+  const box = document.getElementById("stuckBox");
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  const now = new Date();
+
+  const stuck = leads.filter(l => {
+    if (l.status !== "New" || !l.created_at) return false;
+    const created = new Date(l.created_at);
+    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+    return diffDays >= 2;
+  });
+
+  if (!stuck.length) {
+    box.innerHTML = "<span style='color:gray;'>No stuck leads</span>";
+    return;
+  }
+
+  stuck.forEach(l => {
+    const div = document.createElement("div");
+    div.style.padding = "8px";
+    div.style.margin = "5px 0";
+    div.style.background = "#f3e5f5";
+    div.style.borderLeft = "6px solid purple";
+
+    div.innerHTML = `
+      <strong>${l.name}</strong> (${l.phone})<br>
+      ⚠️ STUCK IN NEW | 👤 ${l.assigned_to || "None"}
+    `;
+
+    box.appendChild(div);
   });
 }
 // ================= PIPELINE =================
@@ -730,7 +770,32 @@ async function checkOverdueAndNotify() {
 
     SHOWN.add(l.id);
   });
+
 }
+// ================= STUCK LEADS ALERT =================
+function checkStuckLeads(leads) {
+  const now = new Date();
+
+  leads.forEach(l => {
+    if (l.status !== "New") return;
+
+    if (!l.created_at) return;
+
+    const created = new Date(l.created_at);
+    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+
+    if (diffDays >= 2) {
+      if (SHOWN.has("stuck-" + l.id)) return;
+
+      showPopup(
+        `Lead stuck in NEW for 2+ days: ${l.name} (Assigned: ${l.assigned_to || "None"})`
+      );
+
+      SHOWN.add("stuck-" + l.id);
+    }
+  });
+}
+
 
 // ================= START =================
 init();
