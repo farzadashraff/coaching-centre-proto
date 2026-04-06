@@ -191,6 +191,22 @@ async function init() {
   }
 
   BUSINESS_ID = biz.id;
+  supabaseClient
+    .channel('leads-channel')
+    .on(
+        'postgres_changes',
+        {
+            event: '*',
+            schema: 'public',
+            table: 'Leads',
+            filter: `business_id=eq.${BUSINESS_ID}`
+        },
+        () => {
+            loadLeads();
+        }
+    ) 
+    .subscribe();
+
   setFormLink();
   loadLeads();
 }
@@ -340,7 +356,8 @@ function renderPipeline(leads) {
     };
 
     // ✅ APPEND CARD (CRITICAL)
-    const column = document.getElementById("col-" + l.status);
+    const status = l.status || "New";
+    const column = document.getElementById("col-" + status);
     if (column) column.appendChild(card);
   });
 }

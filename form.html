@@ -922,7 +922,8 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
     category,
     exam,
     business_id: BUSINESS_ID,
-    assigned_to: assignedPerson
+    assigned_to: assignedPerson,
+    status: "New"
   };
 
   const { error } = await supabaseClient
