@@ -308,9 +308,13 @@ function render(leads) {
 
     // FOLLOW-UP ALERT (HIGH PRIORITY VISUAL)
     if (l.next_followup_date) {
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date();
+        today.setHours(0,0,0,0);
 
-    if (l.next_followup_date <= today) {
+    const d = new Date(l.next_followup_date);
+d.setHours(0,0,0,0);
+
+if (d <= today){
         row.style.backgroundColor = "#ffcccc";
         row.style.border = "3px solid #ff0000";
         row.style.animation = "blink 1s infinite"; // 👈 HERE
@@ -495,11 +499,12 @@ function updateAnalytics(leads) {
   const contacted = leads.filter(l => l.status === "Contacted").length;
 
   // TODAY LEADS
-  const today = new Date().toISOString().split("T")[0];
-  const todayLeads = leads.filter(l => {
-    if (!l.created_at) return false;
-    return l.created_at.startsWith(today);
-  }).length;
+  const todayStr = new Date().toISOString().split("T")[0];
+
+const todayLeads = leads.filter(l => {
+  if (!l.created_at) return false;
+  return l.created_at.startsWith(todayStr);
+}).length;
 
   // CATEGORY BREAKDOWN
   const eng = leads.filter(l => l.category === "Engineering").length;
@@ -533,11 +538,17 @@ function renderOverdue(leads) {
   const box = document.getElementById("overdueBox");
   box.innerHTML = "";
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date();
+today.setHours(0,0,0,0);
 
-  const overdue = leads.filter(l =>
-    l.next_followup_date && l.next_followup_date <= today
-  );
+const overdue = leads.filter(l => {
+  if (!l.next_followup_date) return false;
+
+  const d = new Date(l.next_followup_date);
+  d.setHours(0,0,0,0);
+
+  return d < today;
+});
 
   if (!overdue.length) {
     box.innerHTML = "<span style='color:green;'>No overdue follow-ups</span>";
@@ -568,17 +579,24 @@ function renderOverdue(leads) {
 function renderToday(leads) {
   const box = document.getElementById("todayBox");
   box.innerHTML = "";
-  const today = new Date().toISOString().split("T")[0];
 
-  const todayLeads = leads.filter(l =>
-    l.next_followup_date === today
-  );
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const todayLeads = leads.filter(l => {
+    if (!l.next_followup_date) return false;
+
+    const d = new Date(l.next_followup_date);
+    d.setHours(0,0,0,0);
+
+    return d.getTime() === today.getTime();
+  });
 
   if (!todayLeads.length) {
-  box.innerHTML = "<span style='color:gray;'>No follow-ups today</span>";
-  document.getElementById("todayCount").innerText = 0;
-  return;
-}
+    box.innerHTML = "<span style='color:gray;'>No follow-ups today</span>";
+    document.getElementById("todayCount").innerText = 0;
+    return;
+  }
 
   todayLeads.forEach(l => {
     const div = document.createElement("div");
@@ -590,11 +608,12 @@ function renderToday(leads) {
 
     div.innerHTML = `
       <strong>${l.name}</strong> (${l.phone})<br>
-        👤 ${getUserName(l.assigned_to_user_id || "Unassigned")}
+      👤 ${getUserName(l.assigned_to_user_id || "Unassigned")}
     `;
 
     box.appendChild(div);
   });
+
   document.getElementById("todayCount").innerText = todayLeads.length;
 }
 // ================= APPLY FILTERS =================
@@ -766,23 +785,22 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   window.location.href = "/login.html";
 });
-// ================= AUTOMATION =================
+// ================= CHECK OVERDUE & NOTIFY =================
 async function checkOverdueAndNotify() {
   console.log("RUNNING CHECK...");
 
-  const today = new Date().toISOString().split("T")[0];
+  const todayStr = new Date().toISOString().split("T")[0];
 
-  // ✅ DAILY RESET
-  if (!window.LAST_RUN_DATE || window.LAST_RUN_DATE !== today) {
+  if (!window.LAST_RUN_DATE || window.LAST_RUN_DATE !== todayStr) {
     SHOWN.clear();
-    window.LAST_RUN_DATE = today;
+    window.LAST_RUN_DATE = todayStr;
   }
 
   const { data: leads, error } = await supabaseClient
     .from("Leads")
     .select("*")
     .eq("business_id", BUSINESS_ID)
-    .lte("next_followup_date", today);
+    .lte("next_followup_date", todayStr);
 
   if (error) {
     console.error("ERROR:", error);
@@ -792,25 +810,17 @@ async function checkOverdueAndNotify() {
   if (!leads || leads.length === 0) return;
 
   leads.forEach(l => {
-  const key = "email-" + l.id;
+    const key = "email-" + l.id;
 
+    if (SHOWN.has(key)) return;
 
+    showPopup(
+      `Follow-up overdue for ${l.name} (Assigned: ${getUserName(l.assigned_to_user_id || "Unassigned")})`
+    );
 
-  // ✅ Prevent duplicate in same session
-  if (SHOWN.has(key)) return;
-
-  showPopup(
-    `Follow-up overdue for ${l.name} (Assigned: ${getUserName(l.assigned_to_user_id || "Unassigned")})`
-  );
-
-
-
-  SHOWN.add(key);
-
-  // ✅ Mark as sent globally
-  localStorage.setItem(key, TAB_ID);
-});
-
+    SHOWN.add(key);
+    localStorage.setItem(key, TAB_ID);
+  });
 }
 // ================= STUCK LEADS ALERT =================
 function checkStuckLeads(leads) {
