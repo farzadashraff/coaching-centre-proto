@@ -181,34 +181,38 @@ let USERS = {};
 const TAB_ID = Math.random().toString(36).substring(2);
 
 // ================= INIT =================
+let CURRENT_USER = null;
+let CURRENT_ROLE = null;
+
 async function init() {
   const { data: { user } } = await supabaseClient.auth.getUser();
 
-if (!user) {
-  console.log("No user session");
-  window.location.href = "/login.html";
-  return;
-}
+  if (!user) {
+    window.location.href = "/login.html";
+    return;
+  }
 
-console.log("USER ID:", user.id);
+  CURRENT_USER = user;
+
   document.getElementById("userInfo").innerText =
     "Logged in as: " + user.email;
 
-  const { data: biz, error: bizError } = await supabaseClient
+  const { data: biz } = await supabaseClient
     .from("Businesses")
     .select("id")
     .eq("user_id", user.id)
     .single();
 
-  if (bizError || !biz) {
-    alert("No business found");
-    console.error(bizError);
-    return;
-  }
-
-  // ✅ EVERYTHING BELOW MUST BE INSIDE INIT
-
   BUSINESS_ID = biz.id;
+
+  const { data: userRow } = await supabaseClient
+    .from("Users")
+    .select("*")
+    .eq("email", user.email)
+    .single();
+
+  CURRENT_ROLE = userRow.role;
+
   await loadUsers();
 
   supabaseClient
@@ -221,43 +225,45 @@ console.log("USER ID:", user.id);
         table: 'Leads',
         filter: `business_id=eq.${BUSINESS_ID}`
       },
-      () => {
-        loadLeads();
-      }
+      () => loadLeads()
     )
     .subscribe();
 
   setFormLink();
   loadLeads();
 
-  setInterval(() => {
-  console.log("CHECK LOOP...");
-  loadLeads();
-}, 60000);
+  setInterval(() => loadLeads(), 60000);
 }
 
 // ================= LOAD LEADS =================
 async function loadLeads() {
-  const { data: leads, error } = await supabaseClient
+
+  let query = supabaseClient
     .from("Leads")
     .select("*")
-    .eq("business_id", BUSINESS_ID)
-    .order("created_at", { ascending: false });
+    .eq("business_id", BUSINESS_ID);
+
+  if (CURRENT_ROLE !== "admin") {
+    query = query.eq("assigned_to_user_id", CURRENT_USER.id);
+  }
+
+  const { data: leads, error } = await query.order("created_at", { ascending: false });
+
   if (error) {
     console.error(error);
     return;
   }
 
   ALL_LEADS = leads || [];
-render(ALL_LEADS);
-renderPipeline(ALL_LEADS);
-updateAnalytics(ALL_LEADS);
-renderOverdue(ALL_LEADS);
-renderToday(ALL_LEADS);
-checkOverdueAndNotify();
-checkStuckLeads(ALL_LEADS);
-renderStuck(ALL_LEADS);
 
+  render(ALL_LEADS);
+  renderPipeline(ALL_LEADS);
+  updateAnalytics(ALL_LEADS);
+  renderOverdue(ALL_LEADS);
+  renderToday(ALL_LEADS);
+  checkOverdueAndNotify();
+  checkStuckLeads(ALL_LEADS);
+  renderStuck(ALL_LEADS);
 }
 // ================= POPUP =================
 function showPopup(message) {

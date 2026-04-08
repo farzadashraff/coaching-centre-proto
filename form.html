@@ -880,6 +880,33 @@ document.getElementById("category").addEventListener("change", function () {
     examDropdown.appendChild(option);
   });
 });
+let USERS = {};
+
+async function loadUsers() {
+  const { data, error } = await supabaseClient
+    .from("Users")
+    .select("*")
+    .eq("business_id", BUSINESS_ID);
+
+  if (error) {
+    console.error("Users load error:", error);
+    return;
+  }
+
+  USERS = {};
+  data.forEach(u => {
+    USERS[u.id] = u;
+  });
+}
+
+function autoAssignLead(category) {
+  const user = Object.values(USERS).find(u => {
+    if (!u.assigned_categories) return false;
+    return u.assigned_categories.includes(category);
+  });
+
+  return user ? user.id : null;
+}
 
 document.getElementById("leadForm").addEventListener("submit", async function(e) {
   e.preventDefault();
@@ -902,29 +929,21 @@ document.getElementById("leadForm").addEventListener("submit", async function(e)
     return;
   }
 
-  // ✅ ASSIGNMENT LOGIC (PLACE HERE)
-  const assignmentMap = {
-    "Engineering": "Employee 1",
-    "Medical": "Employee 1",
-    "Design": "Employee 2",
-    "Abroad": "Employee 2",
-    "Professional": "Employee 3",
-    "Government": "Employee 3"
-  };
 
-  const assignedPerson = assignmentMap[category] || "Admin";
 
+await loadUsers();
+const assignedUserId = autoAssignLead(category);
   // ✅ PAYLOAD (ONLY ONE)
-  const payload = {
-    name,
-    phone,
-    stage,
-    category,
-    exam,
-    business_id: BUSINESS_ID,
-    assigned_to: assignedPerson,
-    status: "New"
-  };
+const payload = {
+  name,
+  phone,
+  stage,
+  category,
+  exam,
+  business_id: BUSINESS_ID,
+  assigned_to_user_id: assignedUserId,
+  status: "New"
+};
 
   const { error } = await supabaseClient
     .from("Leads")
