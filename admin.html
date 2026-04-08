@@ -183,11 +183,7 @@ const TAB_ID = Math.random().toString(36).substring(2);
 // ================= INIT =================
 let CURRENT_USER = null;
 let CURRENT_ROLE = null;
-function getCurrentUserRow() {
-  return Object.values(USERS).find(
-    u => u.email === CURRENT_USER.email
-  );
-}
+let CURRENT_USER_DB_ID = null;
 
 async function init() {
   const { data: { user } } = await supabaseClient.auth.getUser();
@@ -202,24 +198,26 @@ async function init() {
   document.getElementById("userInfo").innerText =
     "Logged in as: " + user.email;
 
-  const { data: biz } = await supabaseClient
-    .from("Businesses")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
+  
+const { data: userRow } = await supabaseClient
+  .from("Users")
+  .select("*")
+  .eq("email", user.email)
+  .single();
+  if (error || !userRow) {
+  console.error("User not found", error);
+  return;
+}
 
-  BUSINESS_ID = biz.id;
+CURRENT_USER_DB_ID = userRow.id;
+CURRENT_ROLE = userRow.role;
+BUSINESS_ID = userRow.business_id;
 
-  const { data: userRow } = await supabaseClient
-    .from("Users")
-    .select("*")
-    .eq("email", user.email)
-    .single();
-
-  CURRENT_ROLE = userRow.role;
-
+  // ✅ LOAD DATA IN CORRECT ORDER
   await loadUsers();
+  await loadLeads();
 
+  // ✅ REALTIME (NOW BUSINESS_ID EXISTS)
   supabaseClient
     .channel('leads-channel')
     .on(
@@ -234,29 +232,25 @@ async function init() {
     )
     .subscribe();
 
+  // ✅ UI INIT
   setFormLink();
-  loadLeads();
 
+  // ✅ AUTO REFRESH
   setInterval(() => loadLeads(), 60000);
 }
-
 // ================= LOAD LEADS =================
 async function loadLeads() {
-
+if (!BUSINESS_ID) {
+  console.error("BUSINESS_ID missing");
+  return;
+}
   let query = supabaseClient
     .from("Leads")
     .select("*")
     .eq("business_id", BUSINESS_ID);
 
   if (CURRENT_ROLE !== "admin") {
-  const userRow = getCurrentUserRow();
-
-  if (!userRow) {
-    console.error("User mapping failed");
-    return;
-  }
-
-  query = query.eq("assigned_to_user_id", userRow.id);
+  query = query.eq("assigned_to_user_id", CURRENT_USER_DB_ID);
 }
 
   const { data: leads, error } = await query.order("created_at", { ascending: false });
@@ -484,6 +478,7 @@ function renderPipeline(leads) {
 }
 // ================= LOAD USERS =================
 async function loadUsers() {
+    if (!BUSINESS_ID) return;
   const { data, error } = await supabaseClient
     .from("Users")
     .select("*")
@@ -498,8 +493,9 @@ async function loadUsers() {
   data.forEach(u => {
     USERS[u.id] = u;
   });
-}
+  console.log("BUSINESS_ID:", BUSINESS_ID);
 
+}
 // ================= ANALYTICS =================
 function updateAnalytics(leads) {
   const total = leads.length;
