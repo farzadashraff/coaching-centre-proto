@@ -203,7 +203,7 @@ async function init() {
 const { data: userRow, error } = await supabaseClient
   .from("Users")
   .select("*")
-  .eq("email", user.email)
+  .eq("id", user.id)
   .single();
 
 if (error || !userRow) {
@@ -826,7 +826,7 @@ async function checkOverdueAndNotify() {
   if (!leads || leads.length === 0) return;
 
   leads.forEach(l => {
-    const key = "email-" + l.id;
+    const key = "lead-" + l.id;
 
     if (SHOWN.has(key)) return;
 
