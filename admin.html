@@ -145,7 +145,15 @@
   </div>
 
 </div>
+<div style="margin:20px 0; padding:10px; border:1px solid #aaa;">
+  <h3>Add Employee</h3>
 
+  <input id="empName" placeholder="Name" />
+  <input id="empEmail" placeholder="Email" />
+  <input id="empPassword" placeholder="Password" type="password" />
+
+  <button onclick="createEmployee()">Add Employee</button>
+</div>
 
 <table border="1">
   <thead>
@@ -661,6 +669,7 @@ renderToday(filtered);
 document.getElementById("searchInput").addEventListener("input", applyFilters);
 document.getElementById("statusFilter").addEventListener("change", applyFilters);
 
+
 // ================= UPDATE STATUS =================
 async function updateAssigned(id, userId) {
   if (!userId) {
@@ -704,6 +713,55 @@ async function updateStatus(id, status) {
 
   await loadLeads();
 }
+// ================= CREATE EMPLOYEE =================
+async function createEmployee() {
+  const name = document.getElementById("empName").value;
+  const email = document.getElementById("empEmail").value;
+  const password = document.getElementById("empPassword").value;
+
+  if (!name || !email || !password) {
+    alert("Fill all fields");
+    return;
+  }
+
+  // 1. Create auth user
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  const user = data.user;
+
+  // 2. Insert into Users table with SAME business
+  const { error: insertError } = await supabaseClient
+    .from("Users")
+    .insert([{
+      id: user.id,
+      email,
+      name,
+      role: "employee",
+      business_id: BUSINESS_ID
+    }]);
+
+  if (insertError) {
+    alert("User created but DB failed");
+    console.error(insertError);
+    return;
+  }
+
+  alert("Employee added!");
+
+  document.getElementById("empName").value = "";
+  document.getElementById("empEmail").value = "";
+  document.getElementById("empPassword").value = "";
+
+  await loadUsers();
+}
 // ================= UPDATE FOLLOW-UP =================
 async function updateFollowUp(id, date) {
 
@@ -735,6 +793,7 @@ async function updateFollowUp(id, date) {
 
   await loadLeads();
 }
+
 
 // ================= ADD NOTE =================
 async function addNote(leadId) {
