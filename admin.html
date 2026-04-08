@@ -97,6 +97,17 @@
   <strong id="userInfo">Checking user...</strong>
   <button id="logoutBtn">Logout</button>
 </div>
+<hr><br>
+
+<h3>Add Employee</h3>
+
+<input id="empName" placeholder="Name" />
+<input id="empEmail" placeholder="Email" />
+<input id="empPassword" type="password" placeholder="Password" />
+
+<button onclick="createEmployee()">Add Employee</button>
+
+<br><br><hr>
 
 <br><br>
 
@@ -244,10 +255,14 @@ BUSINESS_ID = userRow.business_id;
 
   // ✅ UI INIT
   setFormLink();
+// 🔥 START AUTOMATION LOOP
 
-  // ✅ AUTO REFRESH
-  setInterval(() => loadLeads(), 60000);
-}
+    setInterval(() => {
+        console.log("CHECK LOOP...");
+        checkOverdueAndNotify();
+    }, 60000);
+} // ✅ ADD THIS CLOSING BRACE
+
 // ================= LOAD LEADS =================
 async function loadLeads() {
 if (!BUSINESS_ID) {
@@ -727,7 +742,10 @@ async function createEmployee() {
   // 1. Create auth user
   const { data, error } = await supabaseClient.auth.signUp({
     email,
-    password
+    password,
+    options: {
+      data: { role: "employee" } // ✅ IMPORTANT
+    }
   });
 
   if (error) {
@@ -737,7 +755,7 @@ async function createEmployee() {
 
   const user = data.user;
 
-  // 2. Insert into Users table with SAME business
+  // 2. Insert into Users table
   const { error: insertError } = await supabaseClient
     .from("Users")
     .insert([{
@@ -762,9 +780,9 @@ async function createEmployee() {
 
   await loadUsers();
 }
+
 // ================= UPDATE FOLLOW-UP =================
 async function updateFollowUp(id, date) {
-
   if (!date) {
     alert("Select a date");
     return;
