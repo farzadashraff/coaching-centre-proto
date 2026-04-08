@@ -186,6 +186,7 @@ let CURRENT_ROLE = null;
 let CURRENT_USER_DB_ID = null;
 
 async function init() {
+    console.log("NEW VERSION LOADED");
   const { data: { user } } = await supabaseClient.auth.getUser();
 
   if (!user) {
