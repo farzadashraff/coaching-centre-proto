@@ -199,12 +199,13 @@ async function init() {
     "Logged in as: " + user.email;
 
   
-const { data: userRow } = await supabaseClient
+const { data: userRow, error } = await supabaseClient
   .from("Users")
   .select("*")
   .eq("email", user.email)
   .single();
-  if (error || !userRow) {
+
+if (error || !userRow) {
   console.error("User not found", error);
   return;
 }
