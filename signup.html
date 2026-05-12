@@ -510,10 +510,11 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-// ✅ AUTO REDIRECT IF ALREADY LOGGED IN
+// ✅ ONLY REDIRECT IF SESSION EXISTS ON SIGNUP PAGE
 (async () => {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (user) {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (session) {
     window.location.href = "/admin.html";
   }
 })();
@@ -535,13 +536,12 @@ document.getElementById("signupBtn").onclick = async () => {
     return;
   }
 
-  // ✅ GET USER AFTER SIGNUP
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const user = data.user;
 
-  if (!user) {
-    msg.innerText = "Signup successful. Please login.";
-    return;
-  }
+if (!user) {
+  msg.innerText = "Signup successful. Please verify email before login.";
+  return;
+}
 
   // ✅ CREATE BUSINESS
   const { error: bizError } = await supabaseClient
