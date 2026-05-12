@@ -14,35 +14,42 @@
 
   <style>
     :root {
-      --bg: #131313;
-      --panel: rgba(255, 255, 255, 0.045);
-      --panel-strong: rgba(255, 255, 255, 0.07);
-      --line: rgba(255, 255, 255, 0.08);
-      --line-strong: rgba(255, 255, 255, 0.14);
+      --bg: #111111;
+      --bg-soft: rgba(255, 255, 255, 0.04);
+      --bg-strong: rgba(255, 255, 255, 0.08);
+      --line: rgba(255, 255, 255, 0.12);
+      --line-soft: rgba(255, 255, 255, 0.08);
       --text: #f5f2ec;
-      --muted: #a7a29a;
-      --gold: #dcc08b;
-      --shadow: 0 32px 90px rgba(0, 0, 0, 0.32);
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.18);
+      --muted: #8d8a84;
+      --gold: #d9bc84;
+      --blue: #9cbcff;
+      --teal: #7ad9c7;
+      --rose: #f1a8b5;
+      --violet: #b59cff;
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
-      --max: 1180px;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
+      min-height: 100%;
+    }
+
+    body {
       min-height: 100vh;
+      overflow: hidden;
+      position: relative;
       color: var(--text);
       font-family: "Inter", sans-serif;
       background:
-        radial-gradient(circle at 12% 14%, rgba(255,255,255,0.03), transparent 18%),
-        radial-gradient(circle at 86% 18%, rgba(220, 192, 139, 0.08), transparent 18%),
-        linear-gradient(180deg, #171717 0%, #131313 42%, #101010 100%);
-      overflow-x: hidden;
-      position: relative;
+        radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.035), transparent 18%),
+        radial-gradient(circle at 82% 16%, rgba(217, 188, 132, 0.09), transparent 18%),
+        linear-gradient(180deg, #171717 0%, #121212 48%, #0d0d0d 100%);
     }
 
     body::before {
@@ -51,344 +58,282 @@
       inset: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
       background-size: 56px 56px;
-      mask-image: radial-gradient(circle at center, black 18%, transparent 74%);
-      opacity: 0.22;
-      z-index: 0;
+      mask-image: radial-gradient(circle at center, black 22%, transparent 76%);
+      opacity: 0.28;
     }
 
-    body::after {
-      content: "";
+    .scene {
       position: fixed;
       inset: 0;
+      overflow: hidden;
       pointer-events: none;
+    }
+
+    .scene::before,
+    .scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    .scene::before {
       background:
-        radial-gradient(circle at 18% 18%, rgba(220, 192, 139, 0.08), transparent 18%),
-        radial-gradient(circle at 82% 78%, rgba(255,255,255,0.03), transparent 18%);
-      z-index: 0;
+        radial-gradient(circle at 20% 34%, rgba(122, 217, 199, 0.08), transparent 18%),
+        radial-gradient(circle at 80% 70%, rgba(156, 188, 255, 0.08), transparent 16%),
+        radial-gradient(circle at 66% 24%, rgba(217, 188, 132, 0.08), transparent 16%);
+      filter: blur(10px);
+      animation: sceneGlow 12s ease-in-out infinite alternate;
+    }
+
+    .scene::after {
+      background:
+        linear-gradient(90deg, transparent 12%, rgba(255, 255, 255, 0.03) 12.3%, transparent 12.6%, transparent 54%, rgba(255, 255, 255, 0.03) 54.2%, transparent 54.5%),
+        linear-gradient(transparent 22%, rgba(255, 255, 255, 0.03) 22.2%, transparent 22.5%, transparent 74%, rgba(255, 255, 255, 0.03) 74.2%, transparent 74.5%);
+      opacity: 0.45;
+    }
+
+    .node,
+    .pulse,
+    .rail {
+      position: absolute;
+      border-radius: 999px;
+    }
+
+    .rail {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      opacity: 0.55;
+    }
+
+    .rail.r1 {
+      width: 38vw;
+      top: 22%;
+      left: 8%;
+      transform: rotate(14deg);
+      animation: driftLine 10s ease-in-out infinite;
+    }
+
+    .rail.r2 {
+      width: 30vw;
+      top: 58%;
+      right: 10%;
+      transform: rotate(-18deg);
+      animation: driftLine 13s ease-in-out infinite reverse;
+    }
+
+    .rail.r3 {
+      width: 24vw;
+      bottom: 20%;
+      left: 28%;
+      transform: rotate(8deg);
+      animation: driftLine 11s ease-in-out infinite;
+    }
+
+    .node {
+      width: 10px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.02);
+      animation: pulseNode 4s ease-in-out infinite;
+    }
+
+    .node.n1 {
+      top: 21%;
+      left: 19%;
+      background: var(--gold);
+    }
+
+    .node.n2 {
+      top: 33%;
+      right: 22%;
+      background: var(--blue);
+      animation-delay: 0.8s;
+    }
+
+    .node.n3 {
+      bottom: 26%;
+      left: 31%;
+      background: var(--teal);
+      animation-delay: 1.4s;
+    }
+
+    .node.n4 {
+      bottom: 18%;
+      right: 28%;
+      background: var(--rose);
+      animation-delay: 0.4s;
+    }
+
+    .pulse {
+      width: 140px;
+      height: 140px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      opacity: 0.32;
+      animation: echo 5.5s ease-out infinite;
+    }
+
+    .pulse.p1 {
+      top: 14%;
+      right: 12%;
+      border-color: rgba(156, 188, 255, 0.16);
+    }
+
+    .pulse.p2 {
+      bottom: 10%;
+      left: 10%;
+      border-color: rgba(217, 188, 132, 0.16);
+      animation-delay: 1.6s;
+    }
+
+    .pulse.p3 {
+      top: 44%;
+      left: 8%;
+      border-color: rgba(122, 217, 199, 0.16);
+      animation-delay: 0.8s;
     }
 
     .page-shell {
       position: relative;
       z-index: 1;
-      width: min(calc(100% - 32px), var(--max));
-      margin: 0 auto;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      padding: 28px 0 40px;
+      padding: 32px 20px;
     }
 
-    .top-strip-wrap {
+    .auth-stage {
+      width: min(100%, 640px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      margin-bottom: 18px;
-      animation: fadeUp 0.85s var(--ease) both;
     }
 
-    .top-strip {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(220, 192, 139, 0.22);
-      background: rgba(220, 192, 139, 0.08);
-      color: #f4e7c5;
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-
-    .top-strip::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 0 6px rgba(220, 192, 139, 0.08);
-    }
-
-    .login-shell {
-      position: relative;
-      border: 1px solid var(--line);
-      border-radius: 34px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
-        rgba(18,18,18,0.84);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-      overflow: hidden;
-      padding: clamp(28px, 4vw, 42px);
-      animation: fadeUp 0.95s var(--ease) 0.08s both;
-    }
-
-    .login-shell::before {
-      content: "";
-      position: absolute;
-      inset: auto -10% -18% 48%;
-      height: 240px;
-      background: radial-gradient(circle, rgba(220, 192, 139, 0.18), transparent 60%);
-      pointer-events: none;
-    }
-
-    .login-grid {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
-      gap: 34px;
-      align-items: center;
-    }
-
-    .brand-line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
-      color: var(--muted);
-      font-size: 0.88rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)),
-        linear-gradient(145deg, #252525, #161616 60%, #dcc08b);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-      color: #fff;
+    .wordmark {
+      margin: 0;
       font-family: "Plus Jakarta Sans", sans-serif;
-      font-size: 0.96rem;
+      font-size: clamp(4rem, 12vw, 7.8rem);
       font-weight: 800;
-      flex: 0 0 auto;
+      letter-spacing: -0.08em;
+      line-height: 0.92;
+      text-wrap: balance;
+      text-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      animation: riseIn 1s var(--ease);
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--line);
-      color: #e6e3db;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .wordmark span {
+      display: inline-block;
     }
 
-    .eyebrow::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 0 6px rgba(220, 192, 139, 0.08);
-    }
+    .c1 { color: #f4efe6; }
+    .c2 { color: var(--gold); }
+    .c3 { color: var(--blue); }
+    .c4 { color: var(--teal); }
+    .c5 { color: var(--rose); }
+    .c6 { color: var(--violet); }
+    .c7 { color: #f4efe6; }
+    .c8 { color: var(--gold); }
+    .c9 { color: var(--blue); }
 
-    h1,
-    h2 {
-      margin: 0;
-      font-family: "Plus Jakarta Sans", sans-serif;
-      letter-spacing: -0.06em;
-      line-height: 0.94;
-    }
-
-    .copy-panel h1 {
+    .subhead {
       margin-top: 18px;
-      font-size: clamp(2.8rem, 5vw, 4.8rem);
-      max-width: 10ch;
-    }
-
-    .copy-panel h1 span {
-      display: block;
-      color: var(--gold);
-    }
-
-    .copy-panel p {
-      margin: 18px 0 0;
-      color: var(--muted);
-      line-height: 1.84;
-      max-width: 56ch;
-      font-size: 0.98rem;
-    }
-
-    .trust-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    .trust-pills span {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: #f0ede7;
-      font-size: 0.86rem;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
       font-weight: 600;
+      letter-spacing: -0.04em;
+      animation: breathe 3s var(--ease) infinite;
     }
 
-    .student-highlights {
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+      letter-spacing: 0.01em;
+    }
+
+    .auth-form {
+      width: 100%;
+      max-width: 440px;
+      margin-top: 34px;
       display: grid;
-      gap: 18px;
-      margin-top: 28px;
+      gap: 14px;
     }
 
-    .highlight {
+    .field-shell {
       position: relative;
-      padding-top: 18px;
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px 14px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      border: 1px solid var(--line-soft);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 34px rgba(0, 0, 0, 0.22);
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), box-shadow 220ms var(--ease), background 220ms var(--ease);
+      text-align: left;
     }
 
-    .highlight::before {
+    .field-shell::after {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 88px;
+      left: 18px;
+      right: 18px;
+      bottom: 0;
       height: 1px;
-      background: linear-gradient(90deg, var(--gold), transparent);
+      background: linear-gradient(90deg, transparent, rgba(217, 188, 132, 0.55), transparent);
+      opacity: 0.55;
     }
 
-    .highlight small {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--gold);
-      font-size: 0.74rem;
-      font-weight: 700;
+    .field-shell:hover,
+    .field-shell:focus-within {
+      transform: translateY(-2px);
+      border-color: rgba(217, 188, 132, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 42px rgba(0, 0, 0, 0.26), 0 0 0 4px rgba(217, 188, 132, 0.05);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+    }
+
+    .field-shell label {
+      color: rgba(245, 242, 236, 0.8);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .highlight strong {
-      display: block;
-      margin-bottom: 8px;
-      font-family: "Plus Jakarta Sans", sans-serif;
-      font-size: 1.12rem;
-      letter-spacing: -0.03em;
-    }
-
-    .highlight p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.78;
-      font-size: 0.93rem;
-      max-width: 48ch;
-    }
-
-    .form-panel {
-      max-width: 560px;
-      width: 100%;
-      margin-left: auto;
-    }
-
-    .login-header {
-      text-align: left;
-      margin-bottom: 24px;
-    }
-
-    .login-header h2 {
-      margin-top: 18px;
-      font-size: clamp(2.1rem, 4vw, 3rem);
-    }
-
-    .login-header p {
-      margin: 16px 0 0;
-      color: var(--muted);
-      line-height: 1.82;
-      font-size: 0.98rem;
-      max-width: 48ch;
-    }
-
-    .meta-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .meta-pills span {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: #f0ede7;
-      font-size: 0.86rem;
-      font-weight: 600;
-    }
-
-    .field {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 18px;
-      text-align: left;
-    }
-
-    .field label {
-      color: #f1ede7;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-
-    .field small {
-      color: var(--muted);
-      font-size: 0.84rem;
-      line-height: 1.6;
-      max-width: 48ch;
-    }
-
-    input,
-    button {
-      font: inherit;
     }
 
     input {
       width: 100%;
-      min-height: 58px;
-      padding: 16px 18px;
-      border-radius: 18px;
-      border: 1px solid var(--line-strong);
-      background: rgba(255,255,255,0.045);
-      color: var(--text);
+      padding: 0;
+      border: 0;
       outline: none;
-      transition: border-color 220ms var(--ease), box-shadow 220ms var(--ease), transform 220ms var(--ease), background 220ms var(--ease);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 1rem;
     }
 
     input::placeholder {
-      color: #918d86;
+      color: rgba(141, 138, 132, 0.9);
     }
 
-    input:hover,
-    input:focus {
-      transform: translateY(-1px);
-      border-color: rgba(220, 192, 139, 0.36);
-      background: rgba(255,255,255,0.055);
-    }
-
-    input:focus {
-      box-shadow: 0 0 0 4px rgba(220, 192, 139, 0.1);
+    .actions {
+      margin-top: 8px;
+      display: grid;
+      gap: 12px;
     }
 
     button {
       border: 0;
-      border-radius: 18px;
-      min-height: 56px;
+      border-radius: 20px;
+      min-height: 54px;
       padding: 14px 20px;
+      font: inherit;
       font-weight: 700;
       letter-spacing: -0.02em;
-      transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), filter 220ms var(--ease), background 220ms var(--ease);
+      transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), filter 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
     }
 
     button:hover {
@@ -396,102 +341,121 @@
     }
 
     #loginBtn {
-      width: 100%;
-      background: linear-gradient(135deg, #f0d9a7, #dcc08b);
-      color: #111;
-      box-shadow: 0 18px 34px rgba(220, 192, 139, 0.16);
-    }
-
-    .secondary-area {
-      margin-top: 22px;
-      padding-top: 22px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      text-align: left;
-    }
-
-    .secondary-area p {
-      margin: 0 0 14px;
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 0.92rem;
+      background: linear-gradient(135deg, #f0d9a7, #d9bc84);
+      color: #101010;
+      box-shadow: 0 18px 34px rgba(217, 188, 132, 0.18);
     }
 
     #goSignup {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text);
       border: 1px solid var(--line);
     }
 
-    .reassurance {
-      display: grid;
-      gap: 12px;
-      margin-top: 22px;
-    }
-
-    .reassurance-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.6;
-      text-align: left;
-    }
-
-    .reassurance-item::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 0 6px rgba(220, 192, 139, 0.08);
-      flex: 0 0 auto;
-      margin-top: 4px;
-    }
-
-    br {
-      display: none;
-    }
-
-    @keyframes fadeUp {
+    @keyframes riseIn {
       from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(18px) scale(0.98);
         filter: blur(8px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         filter: blur(0);
       }
     }
 
-    @media (max-width: 1080px) {
-      .login-grid {
-        grid-template-columns: 1fr;
+    @keyframes breathe {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
       }
-
-      .form-panel {
-        margin-left: 0;
-        max-width: 100%;
+      50% {
+        transform: scale(1.035);
+        opacity: 0.92;
       }
     }
 
-    @media (max-width: 760px) {
-      .page-shell {
-        width: min(calc(100% - 20px), var(--max));
-        padding-top: 18px;
+    @keyframes sceneGlow {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      100% {
+        transform: translate3d(0, -10px, 0) scale(1.04);
+      }
+    }
+
+    @keyframes pulseNode {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.02);
+      }
+      50% {
+        transform: scale(1.18);
+        box-shadow: 0 0 0 16px rgba(255, 255, 255, 0.01);
+      }
+    }
+
+    @keyframes echo {
+      0% {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+      30% {
+        opacity: 0.32;
+      }
+      100% {
+        transform: scale(1.55);
+        opacity: 0;
+      }
+    }
+
+    @keyframes driftLine {
+      0%, 100% {
+        transform: translateY(0) rotate(14deg);
+      }
+      50% {
+        transform: translateY(-8px) rotate(16deg);
+      }
+    }
+
+    .rail.r2 {
+      animation-name: driftLineTwo;
+    }
+
+    .rail.r3 {
+      animation-name: driftLineThree;
+    }
+
+    @keyframes driftLineTwo {
+      0%, 100% {
+        transform: translateY(0) rotate(-18deg);
+      }
+      50% {
+        transform: translateY(8px) rotate(-16deg);
+      }
+    }
+
+    @keyframes driftLineThree {
+      0%, 100% {
+        transform: translateY(0) rotate(8deg);
+      }
+      50% {
+        transform: translateY(-6px) rotate(10deg);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .auth-form {
+        max-width: 100%;
       }
 
-      .login-shell {
-        border-radius: 26px;
-        padding: 22px;
+      .wordmark {
+        font-size: clamp(3.1rem, 16vw, 5rem);
       }
 
-      .login-header,
-      .secondary-area {
-        text-align: left;
+      .subhead {
+        font-size: 1.2rem;
       }
     }
   </style>
@@ -499,102 +463,46 @@
 
 <body>
 
-<div class="page-shell">
-  <div class="top-strip-wrap">
-    <div class="top-strip">Admissions open • Next batch guidance available now</div>
-  </div>
+<div class="scene" aria-hidden="true">
+  <div class="rail r1"></div>
+  <div class="rail r2"></div>
+  <div class="rail r3"></div>
+  <div class="node n1"></div>
+  <div class="node n2"></div>
+  <div class="node n3"></div>
+  <div class="node n4"></div>
+  <div class="pulse p1"></div>
+  <div class="pulse p2"></div>
+  <div class="pulse p3"></div>
+</div>
 
-  <section class="login-shell">
-    <div class="login-grid">
-      <div class="copy-panel">
-        <div class="brand-line">
-          <div class="brand-mark">F</div>
-          <span>Fazz Institute</span>
-        </div>
+<main class="page-shell">
+  <section class="auth-stage">
+    <h1 class="wordmark" aria-label="Fazz Stack">
+      <span class="c1">F</span><span class="c2">a</span><span class="c3">z</span><span class="c4">z</span><span class="c5">S</span><span class="c6">t</span><span class="c7">a</span><span class="c8">c</span><span class="c9">k</span>
+    </h1>
 
-        <div class="eyebrow">Welcome Back</div>
-        <h1>Continue the preparation that <span>moves you ahead.</span></h1>
-        <p>
-          You have already taken the first step. Log in now to continue learning, stay focused on your target,
-          and keep moving toward the result you are working for.
-        </p>
+    <div class="subhead">Welcome back</div>
+    <p class="subtitle">Sign in to continue</p>
 
-        <div class="trust-pills">
-          <span>Competitive exam guidance</span>
-          <span>Trusted by serious students</span>
-          <span>Support for focused preparation</span>
-        </div>
-
-        <div class="student-highlights">
-          <div class="highlight">
-            <small>Momentum</small>
-            <strong>Do not break your preparation flow.</strong>
-            <p>
-              Every day matters when your goal is important. Stay connected and keep your progress moving forward.
-            </p>
-          </div>
-
-          <div class="highlight">
-            <small>Direction</small>
-            <strong>Come back to a clear path.</strong>
-            <p>
-              Good preparation feels lighter when you know where you stand and what comes next.
-            </p>
-          </div>
-
-          <div class="highlight">
-            <small>Consistency</small>
-            <strong>Serious results come from regular effort.</strong>
-            <p>
-              Log in, stay engaged, and keep building the discipline that strong results are made from.
-            </p>
-          </div>
-        </div>
+    <div class="auth-form">
+      <div class="field-shell">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="Email"><br><br>
       </div>
 
-      <div class="form-panel">
-        <div class="login-header">
-          <div class="eyebrow">Student Login</div>
-          <h2>Welcome back</h2>
-          <p>
-            Enter your details below and continue where you left off.
-          </p>
+      <div class="field-shell">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Password"><br><br>
+      </div>
 
-          <div class="meta-pills">
-            <span>Quick access</span>
-            <span>Simple sign in</span>
-            <span>Stay on track</span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="email">Email Address</label>
-          <small>Use the email linked to your account.</small>
-          <input type="email" id="email" placeholder="Email"><br><br>
-        </div>
-
-        <div class="field">
-          <label for="password">Password</label>
-          <small>Enter your password to continue your preparation.</small>
-          <input type="password" id="password" placeholder="Password"><br><br>
-        </div>
-
-        <button id="loginBtn">Continue Your Preparation</button>
-
-        <div class="secondary-area">
-          <p>New here? Create your account and begin your preparation with the right guidance.</p>
-          <button id="goSignup">Create Your Account</button>
-        </div>
-
-        <div class="reassurance">
-          <div class="reassurance-item">Quick login with no unnecessary steps.</div>
-          <div class="reassurance-item">Designed to keep you focused on your studies, not on confusion.</div>
-          <div class="reassurance-item">Best for students who want to stay serious and consistent.</div>
-        </div>
+      <div class="actions">
+        <button id="loginBtn">Sign in</button>
+        <button id="goSignup">Create account</button>
       </div>
     </div>
   </section>
-</div>
+</main>
 
 <script>
 const supabaseClient = window.supabase.createClient(
