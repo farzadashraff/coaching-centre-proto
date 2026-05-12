@@ -509,6 +509,13 @@ const supabaseClient = window.supabase.createClient(
   "https://xsdalnxweznnjzogyqaa.supabase.co",
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
+(async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (session) {
+    window.location.href = "/admin.html";
+  }
+})();
 
 document.addEventListener("DOMContentLoaded", () => {
 
