@@ -3,43 +3,123 @@
 
 <head>
   <title>Employee Management</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="employees.css">
 </head>
 
 <body>
 
-<h1>Employee Management</h1>
+<div class="page-shell">
 
-<button onclick="window.location.href='/admin.html'">
-Back to Dashboard
-</button>
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="brand-mark">F</div>
+      <div class="brand-copy">
+        <span class="brand-label">Fazz Institute</span>
+        <span class="brand-subtitle">Admin Workspace</span>
+      </div>
+    </div>
 
-<hr><br>
+    <button class="back-button" onclick="window.location.href='/admin.html'">
+      Back to Dashboard
+    </button>
+  </header>
 
-<h3>Create Employee</h3>
+  <section class="hero-card">
+    <div class="hero-copy">
+      <div class="eyebrow">Team Access</div>
+      <h1>Employee Management</h1>
+      <p>
+        Create staff accounts, organize internal access, and keep your institute team structured in one clean workspace.
+      </p>
+    </div>
 
-<input id="empName" placeholder="Name" />
-<input id="empEmail" placeholder="Email" />
-<input id="empPassword" type="password" placeholder="Password" />
+    <div class="hero-metrics">
+      <div class="metric-card">
+        <span class="metric-title">Fast Setup</span>
+        <strong>Create new employee access in seconds</strong>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Clear Visibility</span>
+        <strong>View team members and assigned roles in one place</strong>
+      </div>
+    </div>
+  </section>
 
-<button onclick="createEmployee()">
-Create Employee
-</button>
+  <main class="content-grid">
 
-<br><br>
+    <section class="panel create-panel">
+      <div class="panel-header">
+        <div class="eyebrow">Create Employee</div>
+        <h3>Add a new team member</h3>
+        <p>
+          Enter the employee details below to create a new login for your institute staff.
+        </p>
+      </div>
 
-<table border="1">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Role</th>
-    </tr>
-  </thead>
+      <div class="form-layout">
+        <div class="field-group">
+          <label for="empName">Full Name</label>
+          <input id="empName" placeholder="Name" />
+        </div>
 
-  <tbody id="employeeTable"></tbody>
-</table>
+        <div class="field-group">
+          <label for="empEmail">Email Address</label>
+          <input id="empEmail" placeholder="Email" />
+        </div>
+
+        <div class="field-group">
+          <label for="empPassword">Temporary Password</label>
+          <input id="empPassword" type="password" placeholder="Password" />
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="primary-button" onclick="createEmployee()">
+          Create Employee
+        </button>
+      </div>
+
+      <div class="helper-strip">
+        <div class="helper-card">
+          <strong>Simple onboarding</strong>
+          <span>Create staff access quickly without leaving the dashboard.</span>
+        </div>
+        <div class="helper-card">
+          <strong>Organized team records</strong>
+          <span>Keep employee names, emails, and roles easy to review.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-header">
+        <div class="eyebrow">Team Directory</div>
+        <h3>Current employees</h3>
+        <p>
+          Review your current employee list and keep track of staff access across the institute.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+
+          <tbody id="employeeTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+</div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="employees.js"></script>
