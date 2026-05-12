@@ -1468,6 +1468,7 @@
     </main>
   </div>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="/js/auth.js"></script>
   <script>
     const root = document.getElementById("smooth-root");
     const content = document.getElementById("content");
@@ -1778,25 +1779,21 @@
       updateReveal();
       updateProgress();
     }
-    // ✅ AUTH CHECK + SMART CTA REDIRECT
-    (async () => {
-      const supabaseClient = window.supabase.createClient(
-        "https://xsdalnxweznnjzogyqaa.supabase.co",
-        "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
-      );
+   (async () => {
+  const { data: { user } } = await supabaseClient.auth.getUser();
 
-      const { data: { user } } = await supabaseClient.auth.getUser();
+  // only change NAV login button
+  if (user) {
 
-      if (user) {
-        const ctaButtons = document.querySelectorAll(".primary-btn");
+    const loginLink = document.querySelector('a[href="/login.html"]');
 
-        ctaButtons.forEach(btn => {
-          btn.onclick = () => {
-            window.location.href = "/admin.html";
-          };
-        });
-      }
-    })();
+    if (loginLink) {
+      loginLink.textContent = "Dashboard";
+      loginLink.href = "/admin.html";
+    }
+
+  }
+})();
 
   </script>
 </body>

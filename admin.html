@@ -171,16 +171,9 @@
 </table>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
 
 <script>
-const supabaseClient = window.supabase.createClient(
-  "https://xsdalnxweznnjzogyqaa.supabase.co",
-  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
-  
-);
-
-
-
 let ALL_LEADS = [];
 let BUSINESS_ID = null;
 let SHOWN = new Set();
@@ -200,6 +193,7 @@ async function init() {
     window.location.href = "/login.html";
     return;
   }
+  console.log("AUTHENTICATED USER:", user.email);
 
   CURRENT_USER = user;
 
@@ -930,7 +924,12 @@ function checkStuckLeads(leads) {
 
 // ================= START =================
 init();
+// ================= LOGOUT FUNCTION =================
+<button onclick="logout()">Logout</button>
 </script>
 
 </body>
+<script>
+requireAuth();
+</script>
 </html>

@@ -5,6 +5,7 @@
 
   <!-- LOAD SUPABASE FIRST -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="/js/auth.js"></script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -505,10 +506,6 @@
 </main>
 
 <script>
-const supabaseClient = window.supabase.createClient(
-  "https://xsdalnxweznnjzogyqaa.supabase.co",
-  "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
-);
 (async () => {
   const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -548,4 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 </body>
+<script>
+redirectIfLoggedIn();
+</script>
 </html>

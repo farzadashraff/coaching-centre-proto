@@ -503,6 +503,7 @@
 </main>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
 
 <script>
 const supabaseClient = window.supabase.createClient(
@@ -515,7 +516,7 @@ const supabaseClient = window.supabase.createClient(
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (session) {
-    window.location.href = "/admin.html";
+    window.location.href = "/login.html";
   }
 })();
 
@@ -558,9 +559,12 @@ if (!user) {
   }
 
   // ✅ DIRECT REDIRECT (NO DELAY)
-  window.location.href = "/admin.html";
+  window.location.href = "/login.html";
 };
 </script>
 
 </body>
+<script>
+redirectIfLoggedIn();
+</script>
 </html>
