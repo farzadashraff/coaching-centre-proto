@@ -5,19 +5,639 @@
 
   <!-- LOAD SUPABASE FIRST -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #131313;
+      --panel: rgba(255, 255, 255, 0.045);
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.14);
+      --text: #f5f2ec;
+      --muted: #a7a29a;
+      --gold: #dcc08b;
+      --gold-soft: rgba(220, 192, 139, 0.12);
+      --shadow: 0 32px 90px rgba(0, 0, 0, 0.32);
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.18);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 12% 14%, rgba(255,255,255,0.03), transparent 18%),
+        radial-gradient(circle at 86% 18%, rgba(220, 192, 139, 0.08), transparent 18%),
+        linear-gradient(180deg, #171717 0%, #131313 42%, #101010 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(circle at center, black 18%, transparent 74%);
+      opacity: 0.22;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(220, 192, 139, 0.08), transparent 18%),
+        radial-gradient(circle at 82% 78%, rgba(255,255,255,0.03), transparent 18%);
+      z-index: 0;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .top-strip-wrap {
+      text-align: center;
+      margin-bottom: 18px;
+      animation: fadeUp 0.85s var(--ease) both;
+    }
+
+    .top-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(220, 192, 139, 0.22);
+      background: rgba(220, 192, 139, 0.08);
+      color: #f4e7c5;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .top-strip::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 6px rgba(220, 192, 139, 0.08);
+    }
+
+    .login-layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .hero-panel,
+    .login-panel {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+        rgba(18,18,18,0.84);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .hero-panel::before,
+    .login-panel::before {
+      content: "";
+      position: absolute;
+      inset: auto -12% -18% 52%;
+      height: 240px;
+      background: radial-gradient(circle, rgba(220, 192, 139, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-panel {
+      padding: clamp(28px, 4vw, 44px);
+      animation: fadeUp 0.95s var(--ease) 0.08s both;
+    }
+
+    .login-panel {
+      padding: clamp(26px, 4vw, 42px);
+      animation: fadeUp 0.95s var(--ease) 0.16s both;
+    }
+
+    .hero-content,
+    .login-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: #e6e3db;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 6px rgba(220, 192, 139, 0.08);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      letter-spacing: -0.06em;
+      line-height: 0.94;
+    }
+
+    .hero-panel h1 {
+      margin-top: 18px;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      max-width: 10ch;
+    }
+
+    .hero-panel h1 span {
+      display: block;
+      color: var(--gold);
+    }
+
+    .hero-panel p {
+      margin: 18px 0 0;
+      color: var(--muted);
+      line-height: 1.86;
+      max-width: 56ch;
+      font-size: 0.98rem;
+    }
+
+    .trust-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .trust-pills span {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: #f0ede7;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .student-highlights {
+      display: grid;
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .highlight {
+      position: relative;
+      padding-top: 18px;
+    }
+
+    .highlight::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 88px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .highlight small {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .highlight strong {
+      display: block;
+      margin-bottom: 8px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 1.14rem;
+      letter-spacing: -0.03em;
+    }
+
+    .highlight p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 0.94rem;
+      max-width: 52ch;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .urgency-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .urgency-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(220, 192, 139, 0.1);
+      border: 1px solid rgba(220, 192, 139, 0.2);
+      color: #f4e7c5;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .urgency-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .batch-note {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .login-header h2 {
+      margin-top: 18px;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+    }
+
+    .login-header p {
+      margin: 16px auto 0;
+      color: var(--muted);
+      line-height: 1.85;
+      max-width: 52ch;
+      font-size: 0.98rem;
+    }
+
+    .meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      justify-content: center;
+    }
+
+    .meta-pills span {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: #f0ede7;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .form-block {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .field {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .field label {
+      color: #f1ede7;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .field small {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.6;
+      max-width: 48ch;
+    }
+
+    input,
+    button {
+      font: inherit;
+    }
+
+    input {
+      width: 100%;
+      min-height: 58px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255,255,255,0.045);
+      color: var(--text);
+      outline: none;
+      transition: border-color 220ms var(--ease), box-shadow 220ms var(--ease), transform 220ms var(--ease), background 220ms var(--ease);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    input::placeholder {
+      color: #918d86;
+    }
+
+    input:hover,
+    input:focus {
+      transform: translateY(-1px);
+      border-color: rgba(220, 192, 139, 0.36);
+      background: rgba(255,255,255,0.055);
+    }
+
+    input:focus {
+      box-shadow: 0 0 0 4px rgba(220, 192, 139, 0.1);
+    }
+
+    button {
+      border: 0;
+      border-radius: 18px;
+      min-height: 56px;
+      padding: 14px 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), filter 220ms var(--ease), background 220ms var(--ease);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    #loginBtn {
+      width: 100%;
+      background: linear-gradient(135deg, #f0d9a7, #dcc08b);
+      color: #111;
+      box-shadow: 0 18px 34px rgba(220, 192, 139, 0.16);
+    }
+
+    .secondary-area {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+
+    .secondary-area p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+
+    #goSignup {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .reassurance {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .reassurance-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .reassurance-item::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 6px rgba(220, 192, 139, 0.08);
+      flex: 0 0 auto;
+      margin-top: 4px;
+    }
+
+    br {
+      display: none;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+        filter: blur(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .login-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page-shell {
+        width: min(calc(100% - 20px), var(--max));
+        padding-top: 18px;
+      }
+
+      .topbar {
+        border-radius: 26px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .topbar-note {
+        text-align: center;
+      }
+
+      .hero-panel,
+      .login-panel {
+        border-radius: 26px;
+      }
+
+      .urgency-row {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>Login</h2>
+<div class="page-shell">
+  <div class="top-strip-wrap">
+    <div class="top-strip">Batch support active now for serious students</div>
+  </div>
 
-<input type="email" id="email" placeholder="Email"><br><br>
-<input type="password" id="password" placeholder="Password"><br><br>
+  <div class="login-layout">
+    <section class="hero-panel">
+      <div class="hero-content">
+        <div class="eyebrow">Welcome Back</div>
+        <h1>Continue your preparation with <span>clarity and focus.</span></h1>
+        <p>
+          Your next result is built through consistency. Log in to continue your learning journey,
+          stay connected with guidance, and move one step closer to your target exam.
+        </p>
 
-<button id="loginBtn">Login</button>
+        <div class="trust-pills">
+          <span>Serious preparation support</span>
+          <span>Guidance for competitive exams</span>
+          <span>Trusted by focused students</span>
+        </div>
 
-<p>Don't have an account?</p>
-<button id="goSignup">Sign Up</button>
+        <div class="student-highlights">
+          <div class="highlight">
+            <small>Consistency</small>
+            <strong>Stay connected to your preparation.</strong>
+            <p>
+              Every strong result comes from regular effort. Logging in keeps you close to the guidance and progress you need.
+            </p>
+          </div>
+
+          <div class="highlight">
+            <small>Direction</small>
+            <strong>Move forward with purpose.</strong>
+            <p>
+              When your plan is clear, your preparation becomes stronger, calmer, and more effective.
+            </p>
+          </div>
+
+          <div class="highlight">
+            <small>Opportunity</small>
+            <strong>Keep your momentum alive.</strong>
+            <p>
+              Students who stay engaged early and consistently usually build a better edge over time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-content">
+        <div class="login-header">
+          <div class="urgency-row">
+            <div class="urgency-pill">Continue your preparation today</div>
+            <div class="batch-note">Quick login • Less than a minute</div>
+          </div>
+
+          <div class="eyebrow">Student Login</div>
+          <h2>Login</h2>
+          <p>
+            Enter your details below to continue learning, stay updated, and remain connected to your preparation journey.
+          </p>
+
+          <div class="meta-pills">
+            <span>Fast access</span>
+            <span>Simple process</span>
+            <span>Focused learning journey</span>
+          </div>
+        </div>
+
+        <div class="form-block">
+          <div class="field">
+            <label for="email">Email Address</label>
+            <small>Use the email linked to your account.</small>
+            <input type="email" id="email" placeholder="Email"><br><br>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <small>Enter your password to continue.</small>
+            <input type="password" id="password" placeholder="Password"><br><br>
+          </div>
+
+          <button id="loginBtn">Continue Your Preparation</button>
+
+          <div class="secondary-area">
+            <p>New here? Start your journey and take the first step toward your goal.</p>
+            <button id="goSignup">Create Your Account</button>
+          </div>
+
+          <div class="reassurance">
+            <div class="reassurance-item">Simple login with no unnecessary steps.</div>
+            <div class="reassurance-item">Designed to keep you focused on your studies, not on confusion.</div>
+            <div class="reassurance-item">Best for students who want to stay serious and consistent.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
 
 <script>
 const supabaseClient = window.supabase.createClient(
