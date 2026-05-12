@@ -506,13 +506,7 @@
 </main>
 
 <script>
-(async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
 
-  if (session) {
-    window.location.href = "/admin.html";
-  }
-})();
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -545,7 +539,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 </body>
-<script>
-redirectIfLoggedIn();
-</script>
 </html>

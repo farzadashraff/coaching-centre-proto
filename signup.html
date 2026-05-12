@@ -511,14 +511,7 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_8YsECibGGtbRwxqf0HhH6w_lBUmW_nt"
 );
 
-// ✅ ONLY REDIRECT IF SESSION EXISTS ON SIGNUP PAGE
-(async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
 
-  if (session) {
-    window.location.href = "/login.html";
-  }
-})();
 
 document.getElementById("signupBtn").onclick = async () => {
   const email = document.getElementById("email").value;
@@ -564,7 +557,4 @@ if (!user) {
 </script>
 
 </body>
-<script>
-redirectIfLoggedIn();
-</script>
 </html>

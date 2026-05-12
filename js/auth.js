@@ -26,17 +26,6 @@ async function requireAuth() {
     window.location.href = "/login.html";
     return;
   }
-
-  console.log("AUTHENTICATED USER:", user.email);
-}
-
-// REDIRECT LOGGED-IN USERS
-async function redirectIfLoggedIn() {
-  const user = await getCurrentUser();
-
-  if (user) {
-    window.location.href = "/admin.html";
-  }
 }
 
 // LOGOUT

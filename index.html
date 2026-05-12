@@ -1102,7 +1102,7 @@
       <a href="#demo">Demo</a>
       <a href="#how">How It Works</a>
       <a href="#contact">Contact</a>
-      <a href="/login.html">Login</a>
+      <a href="/login.html" id="navLoginBtn">Login</a>
       <a href="/signup.html" class="nav-cta">Try Fazz Stack</a>
     </div>
   </nav>
@@ -1779,19 +1779,14 @@
       updateReveal();
       updateProgress();
     }
-   (async () => {
+ (async () => {
   const { data: { user } } = await supabaseClient.auth.getUser();
 
-  // only change NAV login button
-  if (user) {
+  const navBtn = document.getElementById("navLoginBtn");
 
-    const loginLink = document.querySelector('a[href="/login.html"]');
-
-    if (loginLink) {
-      loginLink.textContent = "Dashboard";
-      loginLink.href = "/admin.html";
-    }
-
+  if (user && navBtn) {
+    navBtn.textContent = "Dashboard";
+    navBtn.href = "/admin.html";
   }
 })();
 
