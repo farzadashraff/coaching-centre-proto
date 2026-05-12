@@ -190,8 +190,7 @@ button:hover {
 .form-layout,
 .action-row,
 .helper-strip,
-.table-wrap,
-.office-scene {
+.table-wrap {
   position: relative;
   z-index: 1;
 }
@@ -375,255 +374,11 @@ input:focus {
   letter-spacing: -0.02em;
 }
 
-.table-panel {
-  min-height: 620px;
-}
-
-.office-scene {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-  opacity: 0.95;
-  pointer-events: none;
-}
-
-.scene-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0.28;
-}
-
-.scene-glow-left {
-  width: 240px;
-  height: 240px;
-  left: -40px;
-  top: 80px;
-  background: rgba(220, 192, 139, 0.2);
-  animation: floatGlow 7s ease-in-out infinite;
-}
-
-.scene-glow-right {
-  width: 220px;
-  height: 220px;
-  right: -20px;
-  bottom: 40px;
-  background: rgba(255, 255, 255, 0.08);
-  animation: floatGlow 9s ease-in-out infinite reverse;
-}
-
-.office-layer {
-  position: absolute;
-  inset: 0;
-}
-
-.office-back {
-  opacity: 0.4;
-}
-
-.window-band {
-  position: absolute;
-  inset: 36px 40px auto;
-  height: 110px;
-  border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03)),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255,255,255,0.05) 0 2px,
-      transparent 2px 96px
-    );
-}
-
-.cabins {
-  position: absolute;
-  top: 176px;
-  right: 56px;
-  display: grid;
-  grid-template-columns: repeat(3, 88px);
-  gap: 14px;
-}
-
-.cabin {
-  height: 90px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-  position: relative;
-}
-
-.cabin::after {
-  content: "";
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(220, 192, 139, 0.18);
-}
-
-.office-mid {
-  opacity: 0.55;
-}
-
-.desk-cluster {
-  position: absolute;
-  width: 170px;
-  height: 130px;
-}
-
-.cluster-left {
-  left: 70px;
-  top: 230px;
-  animation: drift 8s ease-in-out infinite;
-}
-
-.cluster-center {
-  left: 300px;
-  top: 250px;
-  animation: drift 10s ease-in-out infinite reverse;
-}
-
-.cluster-right {
-  right: 110px;
-  top: 265px;
-  animation: drift 9s ease-in-out infinite;
-}
-
-.desk {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 18px;
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.12);
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
-}
-
-.person,
-.executive {
-  position: absolute;
-  width: 18px;
-  height: 42px;
-  border-radius: 14px 14px 10px 10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(220, 192, 139, 0.18));
-}
-
-.person::before,
-.executive::before {
-  content: "";
-  position: absolute;
-  top: -11px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.22);
-}
-
-.person.talking {
-  left: 34px;
-  bottom: 34px;
-  animation: callMotion 2.6s ease-in-out infinite;
-}
-
-.person.talking::after {
-  content: "";
-  position: absolute;
-  right: -8px;
-  top: 8px;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid rgba(220, 192, 139, 0.45);
-  border-right: 2px solid rgba(220, 192, 139, 0.45);
-  border-radius: 0 10px 0 0;
-  transform: rotate(18deg);
-}
-
-.person.seated {
-  right: 30px;
-  bottom: 26px;
-  height: 34px;
-  opacity: 0.85;
-}
-
-.person.typing {
-  left: 44px;
-  bottom: 32px;
-  animation: typingMotion 1.8s ease-in-out infinite;
-}
-
-.person.standing {
-  right: 38px;
-  bottom: 36px;
-}
-
-.office-front {
-  opacity: 0.7;
-}
-
-.meeting-room {
-  position: absolute;
-  left: 46px;
-  right: 46px;
-  bottom: 42px;
-  height: 170px;
-  border-radius: 28px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
-  overflow: hidden;
-}
-
-.meeting-room::before {
-  content: "";
-  position: absolute;
-  inset: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(255,255,255,0.06);
-}
-
-.meeting-table {
-  position: absolute;
-  left: 50%;
-  top: 58%;
-  transform: translate(-50%, -50%);
-  width: 260px;
-  height: 48px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.1);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-}
-
-.executive {
-  bottom: 48px;
-  animation: executiveMotion 3.4s ease-in-out infinite;
-}
-
-.exec-one {
-  left: calc(50% - 120px);
-}
-
-.exec-two {
-  left: calc(50% - 9px);
-  height: 48px;
-}
-
-.exec-three {
-  left: calc(50% + 100px);
-}
-
 .table-wrap {
   overflow: hidden;
   border-radius: 22px;
-  border: 1px solid rgba(255,255,255,0.09);
-  background: rgba(12, 12, 12, 0.5);
-  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.03);
 }
 
 table {
@@ -632,7 +387,7 @@ table {
 }
 
 thead {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.04);
 }
 
 th,
@@ -650,7 +405,7 @@ th {
 }
 
 td {
-  color: #d0cbc2;
+  color: var(--muted);
   font-size: 0.94rem;
 }
 
@@ -659,51 +414,19 @@ tbody tr:last-child td {
 }
 
 tbody tr:hover {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.025);
 }
 
-@keyframes floatGlow {
-  0%, 100% {
-    transform: translateY(0) scale(1);
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(8px);
   }
-  50% {
-    transform: translateY(-14px) scale(1.04);
-  }
-}
-
-@keyframes drift {
-  0%, 100% {
+  to {
+    opacity: 1;
     transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes typingMotion {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(4px);
-  }
-}
-
-@keyframes callMotion {
-  0%, 100% {
-    transform: rotate(0deg) translateY(0);
-  }
-  50% {
-    transform: rotate(-5deg) translateY(-3px);
-  }
-}
-
-@keyframes executiveMotion {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
+    filter: blur(0);
   }
 }
 
@@ -721,11 +444,6 @@ tbody tr:hover {
   .primary-button {
     width: 100%;
   }
-
-  .cabins,
-  .cluster-right {
-    display: none;
-  }
 }
 
 @media (max-width: 760px) {
@@ -735,6 +453,7 @@ tbody tr:hover {
 
   .page-shell {
     width: 100%;
+    padding: 0;
   }
 
   .topbar {
@@ -753,22 +472,8 @@ tbody tr:hover {
     padding: 22px;
   }
 
-  .table-panel {
-    min-height: 560px;
-  }
-
   th,
   td {
     padding: 14px 12px;
-  }
-
-  .meeting-room {
-    left: 18px;
-    right: 18px;
-    bottom: 22px;
-  }
-
-  .cluster-center {
-    left: 180px;
   }
 }
