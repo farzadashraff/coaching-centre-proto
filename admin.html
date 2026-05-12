@@ -220,20 +220,22 @@ BUSINESS_ID = userRow.business_id;
   await loadUsers();
   await loadLeads();
 
-  // ✅ REALTIME (NOW BUSINESS_ID EXISTS)
   supabaseClient
-    .channel('leads-channel')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'Leads',
-        filter: `business_id=eq.${BUSINESS_ID}`
-      },
-      () => loadLeads()
-    )
-    .subscribe();
+  .channel('leads-channel')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'Leads',
+      filter: `business_id=eq.${BUSINESS_ID}`
+    },
+    async () => {
+      await loadUsers();
+      await loadLeads();
+    }
+  )
+  .subscribe();
 
   // ✅ UI INIT
   setFormLink();
@@ -497,9 +499,11 @@ async function loadUsers() {
   }
 
   USERS = {};
+  console.log("USERS BEFORE:", USERS);
   data.forEach(u => {
     USERS[u.id] = u;
   });
+  console.log("USERS AFTER:", USERS);
   console.log("BUSINESS_ID:", BUSINESS_ID);
 
 }
