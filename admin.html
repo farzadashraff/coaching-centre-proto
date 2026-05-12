@@ -208,6 +208,8 @@ const { data: userRow, error } = await supabaseClient
   .single();
 
 if (error || !userRow) {
+  console.log("AUTH USER ID:", user.id);
+  console.log("USER ROW:", userRow);
   console.error("User not found", error);
   return;
 }
@@ -500,8 +502,8 @@ async function loadUsers() {
 
   USERS = {};
   console.log("USERS BEFORE:", USERS);
-  data.forEach(u => {
-    USERS[u.id] = u;
+  (data || []).forEach(u => {
+  USERS[u.id] = u;
   });
   console.log("USERS AFTER:", USERS);
   console.log("BUSINESS_ID:", BUSINESS_ID);
