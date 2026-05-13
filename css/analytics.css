@@ -1,0 +1,84 @@
+.main {
+
+    flex: 1;
+    padding: 32px;
+
+    background: #0f172a;
+    min-height: 100vh;
+
+    color: white;
+}
+
+.topbar {
+
+    margin-bottom: 32px;
+}
+
+.page-title {
+
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.page-subtitle {
+
+    color: #94a3b8;
+}
+
+.analytics-grid {
+
+    display: grid;
+
+    grid-template-columns:
+    repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 20px;
+
+    margin-bottom: 32px;
+}
+
+.analytics-card {
+
+    background: #111827;
+
+    border-radius: 18px;
+
+    padding: 24px;
+}
+
+.analytics-title {
+
+    color: #94a3b8;
+
+    margin-bottom: 12px;
+}
+
+.analytics-value {
+
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.chart-section {
+
+    margin-top: 24px;
+}
+
+.chart-card {
+
+    background: #111827;
+
+    border-radius: 18px;
+
+    padding: 24px;
+}
+
+.chart-row {
+
+    display: flex;
+    justify-content: space-between;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid #1e293b;
+}

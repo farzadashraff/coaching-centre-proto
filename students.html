@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Students | FazzStack</title>
+
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/students.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      FazzStack
+    </div>
+
+    <nav class="nav">
+
+      <a href="/admin-new.html">
+        Dashboard
+      </a>
+
+      <a href="/students.html" class="active">
+        Students
+      </a>
+
+      <a href="/attendance.html">
+        Attendance
+      </a>
+
+      <a href="/fees.html">
+        Fees
+      </a>
+
+      <a href="/analytics.html">
+        Analytics
+      </a>
+
+      <a href="/employees.html">
+        Employees
+      </a>
+
+      <a href="/settings.html">
+        Settings
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+      <div>
+
+        <h1 class="page-title">
+          Students
+        </h1>
+
+        <p class="page-subtitle">
+          Manage enrolled students, batches, attendance, and fee status.
+        </p>
+
+      </div>
+
+      <div class="topbar-actions">
+
+        <button class="primary-btn">
+          + Add Student
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- ANALYTICS -->
+
+    <section class="student-overview">
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Total Students
+        </div>
+
+        <div class="overview-value" id="totalStudents">
+          0
+        </div>
+
+      </div>
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Active Students
+        </div>
+
+        <div class="overview-value" id="activeStudents">
+          0
+        </div>
+
+      </div>
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Fees Pending
+        </div>
+
+        <div class="overview-value" id="feesPending">
+          0
+        </div>
+
+      </div>
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Low Attendance
+        </div>
+
+        <div class="overview-value" id="lowAttendance">
+          0
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- FILTERS -->
+
+    <section class="filters-section">
+
+      <div class="search-box">
+
+        <input
+          type="text"
+          id="studentSearch"
+          placeholder="Search student name or phone"
+        />
+
+      </div>
+
+      <div class="filter-group">
+
+        <select id="courseFilter">
+
+          <option value="All">
+            All Courses
+          </option>
+
+          <option value="JEE">
+            JEE
+          </option>
+
+          <option value="NEET">
+            NEET
+          </option>
+
+          <option value="IELTS">
+            IELTS
+          </option>
+
+          <option value="PSC">
+            PSC
+          </option>
+
+        </select>
+
+        <select id="feesFilter">
+
+          <option value="All">
+            All Fee Status
+          </option>
+
+          <option value="Paid">
+            Paid
+          </option>
+
+          <option value="Pending">
+            Pending
+          </option>
+
+        </select>
+
+      </div>
+
+    </section>
+
+    <!-- STUDENTS TABLE -->
+
+    <section class="table-section">
+
+      <table class="students-table">
+
+        <thead>
+
+          <tr>
+
+            <th>Student</th>
+
+            <th>Phone</th>
+
+            <th>Course</th>
+
+            <th>Batch</th>
+
+            <th>Attendance</th>
+
+            <th>Fees</th>
+
+            <th>Status</th>
+
+            <th>Actions</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="studentsTableBody">
+
+          <!-- JS RENDERS HERE -->
+
+        </tbody>
+
+      </table>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script src="/js/auth.js"></script>
+
+<script src="/js/students.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Fees | FazzStack</title>
+
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/fees.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      FazzStack
+    </div>
+
+    <nav class="nav">
+
+      <a href="/admin-new.html">
+        Dashboard
+      </a>
+
+      <a href="/students.html">
+        Students
+      </a>
+
+      <a href="/attendance.html">
+        Attendance
+      </a>
+
+      <a href="/fees.html" class="active">
+        Fees
+      </a>
+
+      <a href="/analytics.html">
+        Analytics
+      </a>
+
+      <a href="/employees.html">
+        Employees
+      </a>
+
+      <a href="/settings.html">
+        Settings
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <div>
+
+        <h1 class="page-title">
+          Fees
+        </h1>
+
+        <p class="page-subtitle">
+          Track payments, pending fees, and collections.
+        </p>
+
+      </div>
+
+      <button class="primary-btn">
+        + Add Payment
+      </button>
+
+    </div>
+
+    <section class="fees-overview">
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Total Collected
+        </div>
+
+        <div class="overview-value" id="totalCollected">
+          ₹0
+        </div>
+
+      </div>
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Pending Amount
+        </div>
+
+        <div class="overview-value" id="pendingAmount">
+          ₹0
+        </div>
+
+      </div>
+
+      <div class="overview-card">
+
+        <div class="overview-title">
+          Paid Students
+        </div>
+
+        <div class="overview-value" id="paidStudents">
+          0
+        </div>
+
+      </div>
+
+    </section>
+
+    <section class="table-section">
+
+      <table class="fees-table">
+
+        <thead>
+
+          <tr>
+
+            <th>Student</th>
+
+            <th>Course</th>
+
+            <th>Fees</th>
+
+            <th>Status</th>
+
+            <th>Due Date</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="feesTableBody">
+
+        </tbody>
+
+      </table>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script src="/js/auth.js"></script>
+
+<script src="/js/fees.js"></script>
+
+</body>
+</html>
