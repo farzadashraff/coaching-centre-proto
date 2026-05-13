@@ -1,0 +1,32 @@
+:root {
+  --bg: #131313;
+  --panel: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.08);
+
+  --text: #f5f2ec;
+  --muted: #9f9f9f;
+
+  --gold: #dcc08b;
+
+  --danger: #ff5f5f;
+  --success: #67d67c;
+  --warning: #ffc857;
+
+  --radius: 18px;
+
+  --shadow:
+    0 20px 60px rgba(0,0,0,0.3);
+
+  --transition: 0.2s ease;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,sans-serif;
+}
