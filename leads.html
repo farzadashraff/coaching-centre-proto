@@ -2,173 +2,393 @@
 <html>
 <head>
   <title>CRM Dashboard</title>
-  <style>
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="leads.css" />
 </head>
 <body>
 
-<div id="popupContainer" style="
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-"></div>
+<div id="popupContainer"></div>
 
-<h2>Leads Dashboard</h2>
-<div style="margin:20px 0; padding:15px; border:1px solid #ccc;">
-
-  <strong>Analytics</strong><br><br>
-
-  <!-- TOP STATS -->
-  <div style="display:flex; gap:20px; flex-wrap:wrap;">
-    <div style="padding:10px; border:1px solid #aaa;">
-      <div>Total Leads</div>
-      <strong id="totalLeads">0</strong>
+<div class="crm-layout">
+  <aside class="crm-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">F</div>
+      <div class="brand-copy">
+        <strong>FazzStack</strong>
+        <span>Lead Operations CRM</span>
+      </div>
     </div>
 
-    <div style="padding:10px; border:1px solid #aaa;">
-      <div>Converted</div>
-      <strong id="convertedLeads">0</strong>
+    <nav class="sidebar-nav">
+      <a class="nav-item nav-item--active" href="#overview">Workspace Overview</a>
+      <a class="nav-item" href="#alerts">Follow-up Alerts</a>
+      <a class="nav-item" href="#pipeline-workspace">Pipeline Board</a>
+      <a class="nav-item" href="#lead-registry">Lead Registry</a>
+    </nav>
+
+    <div class="sidebar-panel">
+      <span class="sidebar-label">Operations Utility</span>
+      <p>Manage team allocation, share the student form link, and keep lead ownership controlled from a single workspace.</p>
+      <button class="sidebar-button" onclick="window.location.href='/employees.html'">
+        Manage Employees
+      </button>
     </div>
+  </aside>
 
-    <div style="padding:10px; border:1px solid #aaa;">
-      <div>Dropped</div>
-      <strong id="droppedLeads">0</strong>
-    </div>
+  <div class="crm-main">
+    <header class="topbar">
+      <div class="topbar-copy">
+        <span class="eyebrow">Enterprise CRM Workspace</span>
+        <h1>Leads Command Center</h1>
+        <p>Monitor pipeline movement, counselor ownership, follow-ups, and conversion quality in one premium operational workspace.</p>
+      </div>
 
-    <div style="padding:10px; border:1px solid #aaa;">
-      <div>Conversion Rate</div>
-      <strong id="conversionRate">0%</strong>
-    </div>
+      <div class="topbar-actions">
+        <div class="meta-pill">
+          <span>Workspace</span>
+          <strong>Realtime sync active</strong>
+        </div>
+
+        <div class="account-chip">
+          <span class="account-label">Session</span>
+          <strong id="userInfo">Checking user...</strong>
+        </div>
+
+        <button id="logoutBtn" class="topbar-button topbar-button--ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="section" id="overview">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Performance Snapshot</span>
+            <h2>Commercial pipeline health</h2>
+            <p>Track intake, conversion momentum, lead quality, and follow-up pressure without losing operational clarity.</p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <span class="kpi-label">Total Leads</span>
+            <div class="kpi-value" id="totalLeads">0</div>
+            <div class="kpi-note">Current visible workload</div>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Converted</span>
+            <div class="kpi-value" id="convertedLeads">0</div>
+            <div class="kpi-note">Closed successfully</div>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Dropped</span>
+            <div class="kpi-value" id="droppedLeads">0</div>
+            <div class="kpi-note">Inactive or lost deals</div>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Conversion Rate</span>
+            <div class="kpi-value" id="conversionRate">0%</div>
+            <div class="kpi-note">Visible lead efficiency</div>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Follow-ups Due</span>
+            <div class="kpi-value" id="pendingFollowups">0</div>
+            <div class="kpi-note">Needs action today</div>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Added Today</span>
+            <div class="kpi-value" id="todayLeads">0</div>
+            <div class="kpi-note">Fresh inbound activity</div>
+          </article>
+        </div>
+
+        <div class="analytics-grid">
+          <article class="info-card">
+            <div class="info-card__head">
+              <div>
+                <span class="info-card__label">Status Breakdown</span>
+                <h3>Stage distribution</h3>
+              </div>
+            </div>
+
+            <div class="pill-grid">
+              <div class="mini-stat">
+                <span>New</span>
+                <strong id="newCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Interested</span>
+                <strong id="interestedCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Contacted</span>
+                <strong id="contactedCount">0</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="info-card">
+            <div class="info-card__head">
+              <div>
+                <span class="info-card__label">Category Mix</span>
+                <h3>Demand by segment</h3>
+              </div>
+            </div>
+
+            <div class="pill-grid">
+              <div class="mini-stat">
+                <span>Engineering</span>
+                <strong id="engCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Medical</span>
+                <strong id="medCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Abroad</span>
+                <strong id="abroadCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Government</span>
+                <strong id="govCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Professional</span>
+                <strong id="profCount">0</strong>
+              </div>
+
+              <div class="mini-stat">
+                <span>Design</span>
+                <strong id="designCount">0</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="utility-grid">
+        <article class="utility-card">
+          <div class="utility-card__head">
+            <div>
+              <span class="panel-label">Shareable Asset</span>
+              <h3>Student form distribution</h3>
+            </div>
+          </div>
+
+          <p>Copy the live student inquiry link and hand it to campaigns, counselors, or front-desk teams without leaving the CRM.</p>
+
+          <div class="form-link-group">
+            <input id="formLink" readonly />
+            <button class="action-button action-button--secondary" onclick="copyLink()">Copy</button>
+          </div>
+        </article>
+
+        <article class="utility-card">
+          <div class="utility-card__head">
+            <div>
+              <span class="panel-label">Operations Control</span>
+              <h3>Team allocation workspace</h3>
+            </div>
+          </div>
+
+          <p>Open employee management to control ownership coverage, operational routing, and staff assignment from the broader workspace.</p>
+
+          <div class="utility-actions">
+            <button class="action-button" onclick="window.location.href='/employees.html'">
+              Manage Employees
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="alerts">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Follow-up Command Center</span>
+            <h2>Priority attention panels</h2>
+            <p>Surface the operational exceptions first so your team can protect response quality and keep the pipeline moving.</p>
+          </div>
+        </div>
+
+        <div class="alerts-grid">
+          <article class="alert-panel alert-panel--danger">
+            <div class="alert-panel__head">
+              <div>
+                <span class="panel-label">Critical Queue</span>
+                <h3>Overdue follow-ups</h3>
+              </div>
+              <span class="alert-count" id="overdueCount">0</span>
+            </div>
+            <div id="overdueBox" class="notice-list"></div>
+          </article>
+
+          <article class="alert-panel alert-panel--violet">
+            <div class="alert-panel__head">
+              <div>
+                <span class="panel-label">Pipeline Friction</span>
+                <h3>Stuck leads</h3>
+              </div>
+            </div>
+            <div id="stuckBox" class="notice-list"></div>
+          </article>
+
+          <article class="alert-panel alert-panel--warning">
+            <div class="alert-panel__head">
+              <div>
+                <span class="panel-label">Today’s Queue</span>
+                <h3>Scheduled follow-ups</h3>
+              </div>
+              <span class="alert-count" id="todayCount">0</span>
+            </div>
+            <div id="todayBox" class="notice-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="controls-section">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Working Controls</span>
+            <h2>Filter and search workspace data</h2>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-field toolbar-field--search">
+            <label for="searchInput">Search leads</label>
+            <input id="searchInput" class="crm-input" placeholder="Search by lead name or phone" />
+          </div>
+
+          <div class="toolbar-field">
+            <label for="statusFilter">Pipeline status</label>
+            <select id="statusFilter" class="crm-select">
+              <option value="All">All</option>
+              <option value="New">New</option>
+              <option value="Interested">Interested</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Converted">Converted</option>
+              <option value="Dropped">Dropped</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="pipeline-section" id="pipeline-workspace">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Pipeline Board</span>
+            <h2>Stage-by-stage lead flow</h2>
+            <p>Drag leads between stages, spot aging follow-ups quickly, and keep counselor ownership visible on every card.</p>
+          </div>
+
+          <div class="meta-pill">
+            <span>Interaction</span>
+            <strong>Drag cards between stages</strong>
+          </div>
+        </div>
+
+        <div id="pipeline" class="pipeline-grid">
+          <section class="pipeline-column pipeline-column--new" data-status="New">
+            <div class="pipeline-column__head">
+              <div>
+                <h4>New</h4>
+                <span>Fresh inbound leads</span>
+              </div>
+              <span class="pipeline-count" data-status="New">0</span>
+            </div>
+            <div id="col-New" class="pipeline-dropzone"></div>
+          </section>
+
+          <section class="pipeline-column pipeline-column--interested" data-status="Interested">
+            <div class="pipeline-column__head">
+              <div>
+                <h4>Interested</h4>
+                <span>Warm lead intent</span>
+              </div>
+              <span class="pipeline-count" data-status="Interested">0</span>
+            </div>
+            <div id="col-Interested" class="pipeline-dropzone"></div>
+          </section>
+
+          <section class="pipeline-column pipeline-column--contacted" data-status="Contacted">
+            <div class="pipeline-column__head">
+              <div>
+                <h4>Contacted</h4>
+                <span>Active conversations</span>
+              </div>
+              <span class="pipeline-count" data-status="Contacted">0</span>
+            </div>
+            <div id="col-Contacted" class="pipeline-dropzone"></div>
+          </section>
+
+          <section class="pipeline-column pipeline-column--converted" data-status="Converted">
+            <div class="pipeline-column__head">
+              <div>
+                <h4>Converted</h4>
+                <span>Won opportunities</span>
+              </div>
+              <span class="pipeline-count" data-status="Converted">0</span>
+            </div>
+            <div id="col-Converted" class="pipeline-dropzone"></div>
+          </section>
+
+          <section class="pipeline-column pipeline-column--dropped" data-status="Dropped">
+            <div class="pipeline-column__head">
+              <div>
+                <h4>Dropped</h4>
+                <span>Closed or lost</span>
+              </div>
+              <span class="pipeline-count" data-status="Dropped">0</span>
+            </div>
+            <div id="col-Dropped" class="pipeline-dropzone"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="table-section" id="lead-registry">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Lead Registry</span>
+            <h2>Detailed lead operations table</h2>
+            <p>Update status, assign ownership, review history, and schedule follow-ups from one enterprise-grade registry.</p>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Stage</th>
+                <th>Category</th>
+                <th>Exam</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Follow-up</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
   </div>
-
-  <br>
-
-  <!-- STATUS -->
-  <div style="padding:10px; border:1px solid #aaa;">
-    <strong>Status Breakdown</strong><br><br>
-    New: <strong id="newCount">0</strong> |
-    Interested: <strong id="interestedCount">0</strong> |
-    Contacted: <strong id="contactedCount">0</strong>
-  </div>
-
-  <br>
-
-  <!-- TODAY -->
-  <div style="padding:10px; border:1px solid #aaa;">
-    <strong>Today</strong><br>
-    <span id="todayLeads">0</span> leads
-  </div>
-
-  <br>
-
-  <!-- CATEGORY -->
-  <div style="padding:10px; border:1px solid #aaa;">
-    <strong>Category</strong><br><br>
-    Engineering: <strong id="engCount">0</strong> |
-    Medical: <strong id="medCount">0</strong> |
-    Abroad: <strong id="abroadCount">0</strong> |
-    Government: <strong id="govCount">0</strong> |
-    Professional: <strong id="profCount">0</strong> |
-    Design: <strong id="designCount">0</strong>
-  </div>
-
 </div>
-
-<h3>🔥 Overdue Follow-ups (<span id="overdueCount">0</span>)</h3>
-<div id="overdueBox" style="border:2px solid red; padding:10px; margin-bottom:20px;"></div>
-<h3>⚠️ Stuck Leads (2+ days)</h3>
-<div id="stuckBox" style="border:2px solid purple; padding:10px; margin-bottom:20px;"></div>
-<h3>📅 Today’s Follow-ups (<span id="todayCount">0</span>)</h3>
-<div id="todayBox" style="border:2px solid orange; padding:10px; margin-bottom:20px;"></div>
-
-<div style="margin: 20px 0;">
-  <strong>Your Student Form Link:</strong><br>
-  <input id="formLink" style="width: 400px;" readonly />
-  <button onclick="copyLink()">Copy</button>
-</div>
-
-<div>
-  <strong id="userInfo">Checking user...</strong>
-  <button id="logoutBtn">Logout</button>
-</div>
-<hr><br>
-
-<button onclick="window.location.href='/employees.html'">
-  Manage Employees
-</button>
-
-<br><br><hr>
-
-<br><br>
-
-<input id="searchInput" placeholder="Search name or phone" />
-<br><br>
-
-<label>Filter by Status: </label>
-<select id="statusFilter">
-  <option value="All">All</option>
-  <option value="New">New</option>
-  <option value="Interested">Interested</option>
-  <option value="Contacted">Contacted</option>
-  <option value="Converted">Converted</option>
-  <option value="Dropped">Dropped</option>
-</select>
-
-<br><br>
-
-<h3>Pipeline</h3>
-
-<div id="pipeline" style="display:flex; gap:15px; margin-bottom:20px;">
-
-  <div style="flex:1; padding:10px; background:#f1f1f1;">
-    <strong>New</strong>
-    <div id="col-New"></div>
-  </div>
-
-  <div style="flex:1; padding:10px; background:#fff3cd;">
-    <strong>Interested</strong>
-    <div id="col-Interested"></div>
-  </div>
-
-  <div style="flex:1; padding:10px; background:#d1ecf1;">
-    <strong>Contacted</strong>
-    <div id="col-Contacted"></div>
-  </div>
-
-  <div style="flex:1; padding:10px; background:#d4edda;">
-    <strong>Converted</strong>
-    <div id="col-Converted"></div>
-  </div>
-
-  <div style="flex:1; padding:10px; background:#f8d7da;">
-    <strong>Dropped</strong>
-    <div id="col-Dropped"></div>
-  </div>
-
-</div>
-
-
-<table border="1">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Phone</th>
-      <th>Stage</th>
-      <th>Category</th>
-      <th>Exam</th>
-      <th>Status</th>
-      <th>Assigned To</th>
-      <th>Follow-up</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/js/auth.js"></script>
@@ -176,113 +396,201 @@
 
 <script>
 
-// ================= LOAD LEADS =================// ================= POPUP =================
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatDateDisplay(dateValue) {
+  if (!dateValue) return "No follow-up";
+
+  const parsed = new Date(dateValue);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return dateValue;
+  }
+
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+function getFollowupState(dateValue) {
+  if (!dateValue) {
+    return {
+      tone: "none",
+      badge: "No follow-up",
+      display: "No follow-up"
+    };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const followup = new Date(dateValue);
+  followup.setHours(0, 0, 0, 0);
+
+  if (followup < today) {
+    return {
+      tone: "overdue",
+      badge: "Overdue",
+      display: formatDateDisplay(dateValue)
+    };
+  }
+
+  if (followup.getTime() === today.getTime()) {
+    return {
+      tone: "today",
+      badge: "Due today",
+      display: formatDateDisplay(dateValue)
+    };
+  }
+
+  return {
+    tone: "scheduled",
+    badge: "Scheduled",
+    display: formatDateDisplay(dateValue)
+  };
+}
+
+// ================= POPUP =================
 function showPopup(message) {
   const box = document.createElement("div");
-
-  box.style.background = "#ffcccc";
-  box.style.borderLeft = "6px solid red";
-  box.style.padding = "12px";
-  box.style.marginBottom = "10px";
-  box.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-  box.style.borderRadius = "6px";
+  box.className = "popup-alert";
 
   box.innerHTML = `
-    <strong>${message}</strong><br>
-    <button onclick="this.parentElement.remove()">Close</button>
+    <div class="popup-alert__content">
+      <strong>${escapeHtml(message)}</strong>
+    </div>
+    <button class="popup-alert__close" onclick="this.parentElement.remove()">Dismiss</button>
   `;
 
   document.getElementById("popupContainer").appendChild(box);
 
   setTimeout(() => {
-  box.remove();
-}, 8000);
+    box.remove();
+  }, 8000);
 }
+
 // ================= EMAIL REMINDER =================
 function sendEmailReminder(lead) {
   console.log("Email trigger (disabled for now):", lead.name);
 }
-// ================= GET USER NAME =================
 
+// ================= GET USER NAME =================
 function getUserName(userId) {
   return USERS[userId]?.name || "Unassigned";
 }
-
 
 // ================= RENDER =================
 function render(leads) {
   const table = document.getElementById("tableBody");
   table.innerHTML = "";
 
+  if (!leads.length) {
+    table.innerHTML = `
+      <tr class="empty-row">
+        <td colspan="8">No leads match the current filters.</td>
+      </tr>
+    `;
+    return;
+  }
+
   leads.forEach(l => {
     const row = document.createElement("tr");
+    const status = l.status || "New";
+    const followup = getFollowupState(l.next_followup_date);
 
-    // COLOR CODING
-    if (l.status === "Converted") row.style.backgroundColor = "#d4edda";
-    if (l.status === "Dropped") row.style.backgroundColor = "#f8d7da";
-    if (l.status === "Interested") row.style.backgroundColor = "#fff3cd";
-    if (l.status === "Contacted") row.style.backgroundColor = "#d1ecf1";
+    row.className = `lead-row lead-row--${status.toLowerCase()}${followup.tone === "overdue" ? " lead-row--overdue" : ""}${followup.tone === "today" ? " lead-row--today" : ""}`;
 
-    // FOLLOW-UP ALERT (HIGH PRIORITY VISUAL)
-    if (l.next_followup_date) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-
-    const d = new Date(l.next_followup_date);
-d.setHours(0,0,0,0);
-
-if (d <= today){
-        row.style.backgroundColor = "#ffcccc";
-        row.style.border = "3px solid #ff0000";
-        row.style.animation = "blink 1s infinite"; // 👈 HERE
-    }
-}
+    const createdLabel = l.created_at
+      ? new Date(l.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+      : "Recently added";
 
     row.innerHTML = `
-      <td>${l.name || ""}</td>
-      <td>${l.phone || ""}</td>
-      <td>${l.stage || ""}</td>
-      <td>${l.category || ""}</td>
-      <td>${l.exam || ""}</td>
-
       <td>
-        <select onchange="updateStatus('${l.id}', this.value)">
-          <option value="New" ${l.status === "New" ? "selected" : ""}>New</option>
-          <option value="Interested" ${l.status === "Interested" ? "selected" : ""}>Interested</option>
-          <option value="Contacted" ${l.status === "Contacted" ? "selected" : ""}>Contacted</option>
-          <option value="Converted" ${l.status === "Converted" ? "selected" : ""}>Converted</option>
-          <option value="Dropped" ${l.status === "Dropped" ? "selected" : ""}>Dropped</option>
-        </select>
-
-        <br><br>
-
-        <button onclick="addNote('${l.id}')">Add Note</button>
-        <button onclick="viewHistory('${l.id}')">View</button>
+        <div class="identity-block">
+          <strong>${escapeHtml(l.name || "Untitled lead")}</strong>
+          <span>${escapeHtml(createdLabel)}</span>
+        </div>
       </td>
 
       <td>
-  <select onchange="updateAssigned('${l.id}', this.value)">
-    <option value="">Unassigned</option>
-    ${Object.values(USERS).map(u => `
-      <option value="${u.id}" ${l.assigned_to_user_id === u.id ? "selected" : ""}>
-        ${u.name}
-      </option>
-    `).join("")}
-  </select>
-</td>
+        <div class="cell-stack">
+          <span>${escapeHtml(l.phone || "—")}</span>
+          <span class="cell-muted">Primary contact</span>
+        </div>
+      </td>
 
       <td>
-        <input 
-          type="date"
-          value="${l.next_followup_date || ""}"
-          onchange="updateFollowUp('${l.id}', this.value)"
-        />
+        <div class="cell-badges">
+          <span class="cell-badge">${escapeHtml(l.stage || "Not set")}</span>
+        </div>
+      </td>
+
+      <td>
+        <div class="cell-badges">
+          <span class="cell-badge">${escapeHtml(l.category || "Not set")}</span>
+        </div>
+      </td>
+
+      <td>
+        <div class="cell-badges">
+          <span class="cell-badge">${escapeHtml(l.exam || "Not set")}</span>
+        </div>
+      </td>
+
+      <td>
+        <div class="table-actions">
+          <select class="crm-select" onchange="updateStatus('${escapeHtml(l.id)}', this.value)">
+            <option value="New" ${l.status === "New" ? "selected" : ""}>New</option>
+            <option value="Interested" ${l.status === "Interested" ? "selected" : ""}>Interested</option>
+            <option value="Contacted" ${l.status === "Contacted" ? "selected" : ""}>Contacted</option>
+            <option value="Converted" ${l.status === "Converted" ? "selected" : ""}>Converted</option>
+            <option value="Dropped" ${l.status === "Dropped" ? "selected" : ""}>Dropped</option>
+          </select>
+
+          <div class="row-actions">
+            <button class="table-button table-button--primary" onclick="addNote('${escapeHtml(l.id)}')">Add Note</button>
+            <button class="table-button table-button--ghost" onclick="viewHistory('${escapeHtml(l.id)}')">View</button>
+          </div>
+        </div>
+      </td>
+
+      <td>
+        <select class="crm-select" onchange="updateAssigned('${escapeHtml(l.id)}', this.value)">
+          <option value="">Unassigned</option>
+          ${Object.values(USERS).map(u => `
+            <option value="${escapeHtml(u.id)}" ${l.assigned_to_user_id === u.id ? "selected" : ""}>
+              ${escapeHtml(u.name)}
+            </option>
+          `).join("")}
+        </select>
+      </td>
+
+      <td>
+        <div class="followup-cell">
+          <input
+            class="crm-date"
+            type="date"
+            value="${escapeHtml(l.next_followup_date || "")}"
+            onchange="updateFollowUp('${escapeHtml(l.id)}', this.value)"
+          />
+          <span class="followup-pill followup-pill--${followup.tone}">${escapeHtml(followup.badge)}</span>
+        </div>
       </td>
     `;
 
     table.appendChild(row);
   });
 }
+
 // ================= STUCK LEADS CHECK =================
 function renderStuck(leads) {
   const box = document.getElementById("stuckBox");
@@ -300,36 +608,42 @@ function renderStuck(leads) {
   });
 
   if (!stuck.length) {
-    box.innerHTML = "<span style='color:gray;'>No stuck leads</span>";
+    box.innerHTML = "<div class='notice-empty'>No stuck leads</div>";
     return;
   }
 
   stuck.forEach(l => {
     const div = document.createElement("div");
-    div.style.padding = "8px";
-    div.style.margin = "5px 0";
-    div.style.background = "#f3e5f5";
-    div.style.borderLeft = "6px solid purple";
+    div.className = "notice-item notice-item--violet";
 
     div.innerHTML = `
-      <strong>${l.name}</strong> (${l.phone})<br>
-      ⚠️ STUCK IN NEW | 👤 ${getUserName(l.assigned_to_user_id || "Unassigned")}
+      <div class="notice-item__title">${escapeHtml(l.name || "Untitled lead")}</div>
+      <div class="notice-item__meta">${escapeHtml(l.phone || "No phone")}</div>
+      <div class="notice-item__footer">
+        <span>Owner: ${escapeHtml(getUserName(l.assigned_to_user_id || "Unassigned"))}</span>
+        <span>Stage: ${escapeHtml(l.status || "New")}</span>
+      </div>
     `;
 
     box.appendChild(div);
   });
 }
+
 // ================= PIPELINE =================
 function renderPipeline(leads) {
-
   const statuses = ["New", "Interested", "Contacted", "Converted", "Dropped"];
 
-  // setup columns
   statuses.forEach(s => {
     const col = document.getElementById("col-" + s);
+    const countEl = document.querySelector(`.pipeline-count[data-status="${s}"]`);
+
     if (!col) return;
 
     col.innerHTML = "";
+
+    if (countEl) {
+      countEl.innerText = leads.filter(l => (l.status || "New") === s).length;
+    }
 
     col.ondragover = (e) => e.preventDefault();
 
@@ -339,51 +653,62 @@ function renderPipeline(leads) {
     };
   });
 
-  // create cards
   leads.forEach(l => {
+    const followup = getFollowupState(l.next_followup_date);
     const card = document.createElement("div");
 
-    card.style.border = "1px solid #aaa";
-    card.style.padding = "8px";
-    card.style.margin = "8px 0";
-    card.style.background = "#fff";
-    card.style.borderRadius = "6px";
-    card.style.cursor = "pointer";
-    card.style.transition = "0.2s";
-
+    card.className = "pipeline-card";
     card.draggable = true;
     card.dataset.id = l.id;
 
     card.innerHTML = `
-  <strong>${l.name || "No Name"}</strong><br>
-  <small>${l.phone || ""}</small><br>
-  <small>👤 ${getUserName(l.assigned_to_user_id)}</small>
-  <small>📅 ${l.next_followup_date || "No follow-up"}</small>
-  `;
+      <div class="pipeline-card__top">
+        <div class="pipeline-card__title">${escapeHtml(l.name || "Untitled lead")}</div>
+        <span class="followup-pill followup-pill--${followup.tone}">${escapeHtml(followup.badge)}</span>
+      </div>
 
-    card.onmouseenter = () => {
-      card.style.transform = "scale(1.02)";
-      card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-    };
+      <div class="pipeline-card__meta">
+        <span>${escapeHtml(l.phone || "No phone")}</span>
+        <span>${escapeHtml(l.stage || "Stage pending")}</span>
+      </div>
 
-    card.onmouseleave = () => {
-      card.style.transform = "scale(1)";
-      card.style.boxShadow = "none";
-    };
+      <div class="pipeline-card__tags">
+        <span>${escapeHtml(l.category || "Category")}</span>
+        <span>${escapeHtml(l.exam || "Exam")}</span>
+      </div>
+
+      <div class="pipeline-card__footer">
+        <span>${escapeHtml(getUserName(l.assigned_to_user_id))}</span>
+        <span>${escapeHtml(followup.display)}</span>
+      </div>
+    `;
 
     card.ondragstart = (e) => {
       e.dataTransfer.setData("id", l.id);
     };
 
-    // ✅ APPEND CARD (CRITICAL)
     const status = l.status || "New";
     const column = document.getElementById("col-" + status);
     if (column) column.appendChild(card);
   });
+
+  statuses.forEach(status => {
+    const column = document.getElementById("col-" + status);
+
+    if (column && !column.children.length) {
+      column.innerHTML = `
+        <div class="pipeline-empty">
+          No leads in this stage
+        </div>
+      `;
+    }
+  });
 }
+
 // ================= LOAD USERS =================
 async function loadUsers() {
-    if (!BUSINESS_ID) return;
+  if (!BUSINESS_ID) return;
+
   const { data, error } = await supabaseClient
     .from("Users")
     .select("*")
@@ -395,97 +720,93 @@ async function loadUsers() {
   }
 
   USERS = {};
-  console.log("USERS BEFORE:", USERS);
   (data || []).forEach(u => {
-  USERS[u.id] = u;
+    USERS[u.id] = u;
   });
-  console.log("USERS AFTER:", USERS);
-  console.log("BUSINESS_ID:", BUSINESS_ID);
-
 }
+
 // ================= OVERDUE FOLLOW-UPS =================
 function renderOverdue(leads) {
   const box = document.getElementById("overdueBox");
   box.innerHTML = "";
 
   const today = new Date();
-today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
 
-const overdue = leads.filter(l => {
-  if (!l.next_followup_date) return false;
+  const overdue = leads.filter(l => {
+    if (!l.next_followup_date) return false;
 
-  const d = new Date(l.next_followup_date);
-  d.setHours(0,0,0,0);
+    const d = new Date(l.next_followup_date);
+    d.setHours(0, 0, 0, 0);
 
-  return d < today;
-});
+    return d < today;
+  });
+
+  document.getElementById("overdueCount").innerText = overdue.length;
 
   if (!overdue.length) {
-    box.innerHTML = "<span style='color:green;'>No overdue follow-ups</span>";
-    document.getElementById("overdueCount").innerText = 0;
+    box.innerHTML = "<div class='notice-empty'>No overdue follow-ups</div>";
     return;
   }
 
   overdue.forEach(l => {
     const div = document.createElement("div");
-    div.style.padding = "8px";
-    div.style.margin = "5px 0";
-    div.style.borderBottom = "1px solid #ccc";
-
-    div.style.background = "#ffe5e5";
-    div.style.borderLeft = "6px solid red";
-    div.style.fontWeight = "bold";
+    div.className = "notice-item notice-item--danger";
 
     div.innerHTML = `
-  <strong>${l.name}</strong> (${l.phone})<br>
-  ⛔ OVERDUE (${l.next_followup_date}) | 👤 ${getUserName(l.assigned_to_user_id || "Unassigned")}
-`;
+      <div class="notice-item__title">${escapeHtml(l.name || "Untitled lead")}</div>
+      <div class="notice-item__meta">${escapeHtml(l.phone || "No phone")}</div>
+      <div class="notice-item__footer">
+        <span>Owner: ${escapeHtml(getUserName(l.assigned_to_user_id || "Unassigned"))}</span>
+        <span>${escapeHtml(formatDateDisplay(l.next_followup_date))}</span>
+      </div>
+    `;
 
     box.appendChild(div);
   });
-  document.getElementById("overdueCount").innerText = overdue.length;
 }
+
 // ================= Render-Today =================
 function renderToday(leads) {
   const box = document.getElementById("todayBox");
   box.innerHTML = "";
 
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
 
   const todayLeads = leads.filter(l => {
     if (!l.next_followup_date) return false;
 
     const d = new Date(l.next_followup_date);
-    d.setHours(0,0,0,0);
+    d.setHours(0, 0, 0, 0);
 
     return d.getTime() === today.getTime();
   });
 
+  document.getElementById("todayCount").innerText = todayLeads.length;
+
   if (!todayLeads.length) {
-    box.innerHTML = "<span style='color:gray;'>No follow-ups today</span>";
-    document.getElementById("todayCount").innerText = 0;
+    box.innerHTML = "<div class='notice-empty'>No follow-ups scheduled today</div>";
     return;
   }
 
   todayLeads.forEach(l => {
     const div = document.createElement("div");
-    div.style.padding = "8px";
-    div.style.margin = "5px 0";
-    div.style.borderBottom = "1px solid #ccc";
-    div.style.background = "#fff8e1";
-    div.style.borderLeft = "6px solid orange";
+    div.className = "notice-item notice-item--warning";
 
     div.innerHTML = `
-      <strong>${l.name}</strong> (${l.phone})<br>
-      👤 ${getUserName(l.assigned_to_user_id || "Unassigned")}
+      <div class="notice-item__title">${escapeHtml(l.name || "Untitled lead")}</div>
+      <div class="notice-item__meta">${escapeHtml(l.phone || "No phone")}</div>
+      <div class="notice-item__footer">
+        <span>Owner: ${escapeHtml(getUserName(l.assigned_to_user_id || "Unassigned"))}</span>
+        <span>${escapeHtml(formatDateDisplay(l.next_followup_date))}</span>
+      </div>
     `;
 
     box.appendChild(div);
   });
-
-  document.getElementById("todayCount").innerText = todayLeads.length;
 }
+
 // ================= APPLY FILTERS =================
 function applyFilters() {
   const searchValue = document.getElementById("searchInput").value.toLowerCase();
@@ -505,16 +826,15 @@ function applyFilters() {
   }
 
   render(filtered);
-renderPipeline(filtered);
-updateAnalytics(filtered);
-renderOverdue(filtered);
-renderToday(filtered);
+  renderPipeline(filtered);
+  updateAnalytics(filtered);
+  renderOverdue(filtered);
+  renderToday(filtered);
+  renderStuck(filtered);
 }
 
-// ✅ ONLY ONE SET OF LISTENERS (FIXED)
 document.getElementById("searchInput").addEventListener("input", applyFilters);
 document.getElementById("statusFilter").addEventListener("change", applyFilters);
-
 
 // ================= UPDATE STATUS =================
 async function updateAssigned(id, userId) {
@@ -544,19 +864,68 @@ async function updateAssigned(id, userId) {
 
   await loadLeads();
 }
-// ================= UPDATE STATUS =================
-async function updateStatus(id, status) {
-  const { error } = await supabaseClient
-    .from("Leads")
-    .update({ status })
-    .eq("id", id);
 
-  if (error) {
-    console.error(error);
+// ================= UPDATE STATUS =================
+async function updateStatus(id, newStatus) {
+
+  // STEP 1: GET CURRENT LEAD
+  const { data: lead, error: fetchError } =
+    await supabaseClient
+      .from("Leads")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+  if (fetchError || !lead) {
+    console.error(fetchError);
+    alert("Failed to fetch lead");
+    return;
+  }
+
+  const oldStatus = lead.status || "New";
+
+  // PREVENT DUPLICATE UPDATES
+  if (oldStatus === newStatus) {
+    return;
+  }
+
+  // STEP 2: UPDATE LEAD
+  const { error: updateError } =
+    await supabaseClient
+      .from("Leads")
+      .update({
+        status: newStatus,
+        status_updated_at: new Date().toISOString(),
+        last_contacted_at: new Date().toISOString()
+      })
+      .eq("id", id);
+
+  if (updateError) {
+    console.error(updateError);
     alert("Failed to update status");
     return;
   }
 
+  // STEP 3: LOG INTERACTION HISTORY
+  const { error: interactionError } =
+    await supabaseClient
+      .from("interactions")
+      .insert([{
+        lead_id: id,
+        type: "status_change",
+        message: `Status changed from ${oldStatus} to ${newStatus}`,
+        actor_user_id: CURRENT_USER_DB_ID,
+        metadata: {
+          from: oldStatus,
+          to: newStatus
+        }
+      }]);
+
+  if (interactionError) {
+    console.error(interactionError);
+  }
+
+  // STEP 4: RELOAD
   await loadLeads();
 }
 // ================= CREATE EMPLOYEE =================
@@ -570,12 +939,11 @@ async function createEmployee() {
     return;
   }
 
-  // 1. Create auth user
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
     options: {
-      data: { role: "employee" } // ✅ IMPORTANT
+      data: { role: "employee" }
     }
   });
 
@@ -586,7 +954,6 @@ async function createEmployee() {
 
   const user = data.user;
 
-  // 2. Insert into Users table
   const { error: insertError } = await supabaseClient
     .from("Users")
     .insert([{
@@ -642,7 +1009,6 @@ async function updateFollowUp(id, date) {
 
   await loadLeads();
 }
-
 
 // ================= ADD NOTE =================
 async function addNote(leadId) {
@@ -709,6 +1075,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   window.location.href = "/login.html";
 });
+
 // ================= CHECK OVERDUE & NOTIFY =================
 async function checkOverdueAndNotify() {
   console.log("RUNNING CHECK...");
@@ -746,13 +1113,13 @@ async function checkOverdueAndNotify() {
     localStorage.setItem(key, TAB_ID);
   });
 }
+
 // ================= STUCK LEADS ALERT =================
 function checkStuckLeads(leads) {
   const now = new Date();
 
   leads.forEach(l => {
     if (l.status !== "New") return;
-
     if (!l.created_at) return;
 
     const created = new Date(l.created_at);
@@ -769,7 +1136,6 @@ function checkStuckLeads(leads) {
     }
   });
 }
-
 
 // ================= START =================
 init();

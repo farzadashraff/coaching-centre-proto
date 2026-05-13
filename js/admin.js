@@ -144,7 +144,16 @@ async function loadLeads() {
     }
 
     ALL_LEADS = data || [];
+ALL_LEADS = ALL_LEADS.map(lead => {
 
+    return {
+
+        ...lead,
+
+        aging: calculateLeadAging(lead)
+    };
+});
+console.log(ALL_LEADS);
     updateAnalytics(ALL_LEADS);
 
 
@@ -178,7 +187,82 @@ async function loadLeads() {
     }
 }
 
+function calculateLeadAging(lead) {
 
+    const now = new Date();
+
+    // LEAD AGE
+    let leadAgeDays = 0;
+
+    if (lead.created_at) {
+
+        const created = new Date(lead.created_at);
+
+        leadAgeDays =
+        Math.floor(
+            (now - created) /
+            (1000 * 60 * 60 * 24)
+        );
+    }
+
+    // STAGE AGE
+    let stageAgeDays = 0;
+
+    if (lead.status_updated_at) {
+
+        const stageUpdated =
+        new Date(lead.status_updated_at);
+
+        stageAgeDays =
+        Math.floor(
+            (now - stageUpdated) /
+            (1000 * 60 * 60 * 24)
+        );
+    }
+
+    // INACTIVITY
+    let inactivityDays = 0;
+
+    if (lead.last_contacted_at) {
+
+        const lastContact =
+        new Date(lead.last_contacted_at);
+
+        inactivityDays =
+        Math.floor(
+            (now - lastContact) /
+            (1000 * 60 * 60 * 24)
+        );
+    }
+
+    // FOLLOWUP DELAY
+    let followupDelay = 0;
+
+    if (lead.next_followup_date) {
+
+        const followup =
+        new Date(lead.next_followup_date);
+
+        followupDelay =
+        Math.floor(
+            (now - followup) /
+            (1000 * 60 * 60 * 24)
+        );
+
+        // ONLY OVERDUE COUNTS
+        if (followupDelay < 0) {
+            followupDelay = 0;
+        }
+    }
+
+    return {
+
+        leadAgeDays,
+        stageAgeDays,
+        inactivityDays,
+        followupDelay
+    };
+}
 
 function updateAnalytics(leads) {
 
