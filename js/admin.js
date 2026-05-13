@@ -143,17 +143,31 @@ async function loadLeads() {
         return;
     }
 
-    ALL_LEADS = data || [];
+   ALL_LEADS = data || [];
+
 ALL_LEADS = ALL_LEADS.map(lead => {
 
-    return {
+    const aging =
+    calculateLeadAging(lead);
+
+    const enrichedLead = {
 
         ...lead,
 
-        aging: calculateLeadAging(lead)
+        aging
+    };
+
+    return {
+
+        ...enrichedLead,
+
+        score:
+        calculateLeadScore(enrichedLead)
     };
 });
-console.log(ALL_LEADS);
+
+ALL_LEADS.sort((a, b) => b.score - a.score);
+
     updateAnalytics(ALL_LEADS);
 
 
@@ -206,19 +220,26 @@ function calculateLeadAging(lead) {
     }
 
     // STAGE AGE
-    let stageAgeDays = 0;
+let stageAgeDays = 0;
 
-    if (lead.status_updated_at) {
+const stageReferenceDate =
+    lead.status_updated_at ||
+    lead.created_at;
 
-        const stageUpdated =
-        new Date(lead.status_updated_at);
+if (stageReferenceDate) {
 
-        stageAgeDays =
-        Math.floor(
-            (now - stageUpdated) /
-            (1000 * 60 * 60 * 24)
-        );
-    }
+    const stageUpdated =
+    new Date(stageReferenceDate);
+
+    stageAgeDays =
+    Math.floor(
+        (now - stageUpdated) /
+        (1000 * 60 * 60 * 24)
+    );
+}
+
+  
+    
 
     // INACTIVITY
     let inactivityDays = 0;
@@ -262,6 +283,49 @@ function calculateLeadAging(lead) {
         inactivityDays,
         followupDelay
     };
+}
+
+function calculateLeadScore(lead) {
+
+    let score = 50;
+
+    // STATUS SCORING
+    if (lead.status === "Interested") {
+        score += 25;
+    }
+
+    if (lead.status === "Contacted") {
+        score += 15;
+    }
+
+    if (lead.status === "Converted") {
+        score += 40;
+    }
+
+    if (lead.status === "Dropped") {
+        score -= 40;
+    }
+
+    // FOLLOW-UP DISCIPLINE
+    if (lead.aging?.followupDelay > 0) {
+        score -= lead.aging.followupDelay * 5;
+    }
+
+    // INACTIVITY PENALTY
+    if (lead.aging?.inactivityDays > 5) {
+        score -= 10;
+    }
+
+    // STAGE STUCK PENALTY
+    if (lead.aging?.stageAgeDays > 7) {
+        score -= 15;
+    }
+
+    // CLAMP SCORE
+    if (score > 100) score = 100;
+    if (score < 0) score = 0;
+
+    return score;
 }
 
 function updateAnalytics(leads) {

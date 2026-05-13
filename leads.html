@@ -378,8 +378,13 @@
                 <th>Category</th>
                 <th>Exam</th>
                 <th>Status</th>
+                <th>Score</th>
                 <th>Assigned To</th>
                 <th>Follow-up</th>
+                <th>Lead Age</th>
+                <th>Stage Age</th>
+                <th>Inactive</th> 
+
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -496,7 +501,7 @@ function render(leads) {
   if (!leads.length) {
     table.innerHTML = `
       <tr class="empty-row">
-        <td colspan="8">No leads match the current filters.</td>
+        <td colspan="11">No leads match the current filters.</td>
       </tr>
     `;
     return;
@@ -562,6 +567,16 @@ function render(leads) {
           </div>
         </div>
       </td>
+      <td>
+  <span class="
+    cell-badge
+    ${l.score >= 80 ? 'score-hot' : ''}
+    ${l.score >= 50 && l.score < 80 ? 'score-warm' : ''}
+    ${l.score < 50 ? 'score-cold' : ''}
+  ">
+    ${l.score}
+  </span>
+</td>
 
       <td>
         <select class="crm-select" onchange="updateAssigned('${escapeHtml(l.id)}', this.value)">
@@ -585,6 +600,23 @@ function render(leads) {
           <span class="followup-pill followup-pill--${followup.tone}">${escapeHtml(followup.badge)}</span>
         </div>
       </td>
+      <td>
+  <span class="cell-badge">
+    ${l.aging?.leadAgeDays || 0}d
+  </span>
+</td>
+
+<td>
+  <span class="cell-badge">
+    ${l.aging?.stageAgeDays || 0}d
+  </span>
+</td>
+
+<td>
+  <span class="cell-badge">
+    ${l.aging?.inactivityDays || 0}d
+  </span>
+</td>
     `;
 
     table.appendChild(row);
@@ -598,14 +630,11 @@ function renderStuck(leads) {
 
   box.innerHTML = "";
 
-  const now = new Date();
-
   const stuck = leads.filter(l => {
-    if (l.status !== "New" || !l.created_at) return false;
-    const created = new Date(l.created_at);
-    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
-    return diffDays >= 2;
-  });
+  if (l.status !== "New") return false;
+
+  return l.aging?.stageAgeDays >= 2;
+});
 
   if (!stuck.length) {
     box.innerHTML = "<div class='notice-empty'>No stuck leads</div>";
@@ -656,6 +685,7 @@ function renderPipeline(leads) {
   leads.forEach(l => {
     const followup = getFollowupState(l.next_followup_date);
     const card = document.createElement("div");
+    const aging = l.aging || {};
 
     card.className = "pipeline-card";
     card.draggable = true;
@@ -678,9 +708,18 @@ function renderPipeline(leads) {
       </div>
 
       <div class="pipeline-card__footer">
-        <span>${escapeHtml(getUserName(l.assigned_to_user_id))}</span>
-        <span>${escapeHtml(followup.display)}</span>
-      </div>
+  <span>
+    ${escapeHtml(getUserName(l.assigned_to_user_id))}
+  </span>
+
+  <span>
+    ${aging.stageAgeDays || 0}d in stage
+  </span>
+
+  <span>
+    ${escapeHtml(followup.display)}
+  </span>
+</div>
     `;
 
     card.ondragstart = (e) => {
@@ -705,25 +744,7 @@ function renderPipeline(leads) {
   });
 }
 
-// ================= LOAD USERS =================
-async function loadUsers() {
-  if (!BUSINESS_ID) return;
 
-  const { data, error } = await supabaseClient
-    .from("Users")
-    .select("*")
-    .eq("business_id", BUSINESS_ID);
-
-  if (error) {
-    console.error("Error loading users:", error);
-    return;
-  }
-
-  USERS = {};
-  (data || []).forEach(u => {
-    USERS[u.id] = u;
-  });
-}
 
 // ================= OVERDUE FOLLOW-UPS =================
 function renderOverdue(leads) {
@@ -806,35 +827,6 @@ function renderToday(leads) {
     box.appendChild(div);
   });
 }
-
-// ================= APPLY FILTERS =================
-function applyFilters() {
-  const searchValue = document.getElementById("searchInput").value.toLowerCase();
-  const selectedStatus = document.getElementById("statusFilter").value;
-
-  let filtered = ALL_LEADS;
-
-  if (searchValue) {
-    filtered = filtered.filter(l =>
-      (l.name || "").toLowerCase().includes(searchValue) ||
-      (l.phone || "").includes(searchValue)
-    );
-  }
-
-  if (selectedStatus !== "All") {
-    filtered = filtered.filter(l => l.status === selectedStatus);
-  }
-
-  render(filtered);
-  renderPipeline(filtered);
-  updateAnalytics(filtered);
-  renderOverdue(filtered);
-  renderToday(filtered);
-  renderStuck(filtered);
-}
-
-document.getElementById("searchInput").addEventListener("input", applyFilters);
-document.getElementById("statusFilter").addEventListener("change", applyFilters);
 
 // ================= UPDATE STATUS =================
 async function updateAssigned(id, userId) {
@@ -1069,63 +1061,19 @@ function copyLink() {
   document.execCommand("copy");
   alert("Link copied!");
 }
-
-// ================= LOGOUT =================
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  window.location.href = "/login.html";
-});
-
-// ================= CHECK OVERDUE & NOTIFY =================
-async function checkOverdueAndNotify() {
-  console.log("RUNNING CHECK...");
-
-  const todayStr = new Date().toISOString().split("T")[0];
-
-  if (!window.LAST_RUN_DATE || window.LAST_RUN_DATE !== todayStr) {
-    SHOWN.clear();
-    window.LAST_RUN_DATE = todayStr;
-  }
-
-  const { data: leads, error } = await supabaseClient
-    .from("Leads")
-    .select("*")
-    .eq("business_id", BUSINESS_ID)
-    .lte("next_followup_date", todayStr);
-
-  if (error) {
-    console.error("ERROR:", error);
-    return;
-  }
-
-  if (!leads || leads.length === 0) return;
-
-  leads.forEach(l => {
-    const key = "lead-" + l.id;
-
-    if (SHOWN.has(key)) return;
-
-    showPopup(
-      `Follow-up overdue for ${l.name} (Assigned: ${getUserName(l.assigned_to_user_id || "Unassigned")})`
-    );
-
-    SHOWN.add(key);
-    localStorage.setItem(key, TAB_ID);
-  });
-}
-
 // ================= STUCK LEADS ALERT =================
 function checkStuckLeads(leads) {
-  const now = new Date();
 
   leads.forEach(l => {
+
     if (l.status !== "New") return;
-    if (!l.created_at) return;
 
-    const created = new Date(l.created_at);
-    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+    // Skip if aging system not available yet
+    if (!l.aging) return;
 
-    if (diffDays >= 2) {
+    // Detect stale lead based on stage aging
+    if (l.aging.stageAgeDays >= 2) {
+
       if (SHOWN.has("stuck-" + l.id)) return;
 
       showPopup(
@@ -1133,12 +1081,11 @@ function checkStuckLeads(leads) {
       );
 
       SHOWN.add("stuck-" + l.id);
-    } 
-  });
-}
+    }
 
-// ================= START =================
-init();
+  });
+
+}
 
 </script>
 

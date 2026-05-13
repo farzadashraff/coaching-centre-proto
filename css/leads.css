@@ -1100,3 +1100,17 @@ input[type="date"]:focus {
     right: 12px;
   }
 }
+.score-hot {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+}
+
+.score-warm {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+}
+
+.score-cold {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+}
