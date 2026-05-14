@@ -910,33 +910,59 @@ if (newStatus === "Converted") {
   if (!existingStudent) {
 
     const { error: studentError } =
-      await supabaseClient
-        .from("Students")
-        .insert([{
+  await supabaseClient
+    .from("Students")
+    .insert([{
 
-          business_id: BUSINESS_ID,
+      business_id: BUSINESS_ID,
 
-          lead_id: lead.id,
+      lead_id: lead.id,
 
-          full_name: lead.name,
+      full_name: lead.name,
 
-          phone: lead.phone,
+      phone: lead.phone,
 
-          email: lead.email || null,
+      email: lead.email || null,
 
-          parent_phone: lead.parent_phone || null,
+      whatsapp_number:
+      lead.whatsapp_number || null,
 
-          course: lead.category || "General",
+      parent_name:
+      lead.parent_name || null,
 
-          total_fee: 0,
+      parent_phone:
+      lead.parent_phone || null,
 
-          paid_fee: 0,
+      gender:
+      lead.gender || null,
 
-          due_fee: 0,
+      date_of_birth:
+      lead.date_of_birth || null,
 
-          status: "Active"
-        }]);
+      city:
+      lead.city || null,
 
+      state:
+      lead.state || null,
+
+      school_college:
+      lead.school_college || null,
+
+      qualification:
+      lead.qualification || null,
+
+      course:
+      lead.category || "General",
+
+      total_fee: 0,
+
+      paid_fee: 0,
+
+      due_fee: 0,
+
+      status: "Active"
+    }]);
+    
     if (studentError) {
 
       console.error(studentError);

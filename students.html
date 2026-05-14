@@ -32,15 +32,13 @@
 
     <nav class="nav">
 
-  <a href="/admin-new.html">
-    Dashboard
-  </a>
+      <a href="/admin-new.html">
+        Dashboard
+      </a>
 
-
-
-  <a href="/students.html" class="active">
-    Students
-  </a>
+      <a href="/students.html" class="active">
+        Students
+      </a>
 
       <a href="/attendance.html">
         Attendance
@@ -68,82 +66,256 @@
 
   <!-- MAIN -->
 
-  <main class="main">
+  <main class="main students-main">
 
-    <!-- TOPBAR -->
+    <!-- HERO / TOPBAR SURFACE -->
 
-    <div class="topbar">
+    <section class="workspace-panel workspace-panel--hero">
 
-      <div>
+      <div class="topbar">
 
-        <h1 class="page-title">
-          Students
-        </h1>
+        <div>
 
-        <p class="page-subtitle">
-          Manage enrolled students, batches, attendance, and fee status.
-        </p>
+          <span class="section-kicker">
+            Student ERP Workspace
+          </span>
+
+          <h1 class="page-title">
+            Students
+          </h1>
+
+          <p class="page-subtitle">
+            Manage enrolled students, batches, attendance, fee exposure, and academic status from one premium operational workspace.
+          </p>
+
+        </div>
+
+        <div class="topbar-actions">
+
+          <button class="primary-btn">
+            + Add Student
+          </button>
+
+        </div>
 
       </div>
 
-      <div class="topbar-actions">
-
-        <button class="primary-btn">
-          + Add Student
-        </button>
-
-      </div>
-
-    </div>
+    </section>
 
     <!-- ANALYTICS -->
 
-    <section class="student-overview">
+    <section class="workspace-panel workspace-panel--overview">
 
-      <div class="overview-card">
+      <div class="panel-head">
 
-        <div class="overview-title">
-          Total Students
-        </div>
+        <div>
 
-        <div class="overview-value" id="totalStudents">
-          0
-        </div>
+          <span class="section-kicker">
+            Enrollment Overview
+          </span>
 
-      </div>
+          <h2 class="section-title">
+            Student lifecycle snapshot
+          </h2>
 
-      <div class="overview-card">
+          <p class="section-subtitle">
+            Track admissions, activity, attendance risk, and payment health with a clean ERP overview designed for daily operations.
+          </p>
 
-        <div class="overview-title">
-          Active Students
-        </div>
-
-        <div class="overview-value" id="activeStudents">
-          0
         </div>
 
       </div>
 
-      <div class="overview-card">
+      <section class="student-overview">
 
-        <div class="overview-title">
-          Fees Pending
+        <div class="overview-card">
+
+          <div class="overview-title">
+            Total Students
+          </div>
+
+          <div class="overview-value" id="totalStudents">
+            0
+          </div>
+
         </div>
 
-        <div class="overview-value" id="feesPending">
-          0
+        <div class="overview-card">
+
+          <div class="overview-title">
+            Active Students
+          </div>
+
+          <div class="overview-value" id="activeStudents">
+            0
+          </div>
+
+        </div>
+
+        <div class="overview-card">
+
+          <div class="overview-title">
+            Fees Pending
+          </div>
+
+          <div class="overview-value" id="feesPending">
+            0
+          </div>
+
+        </div>
+
+        <div class="overview-card">
+
+          <div class="overview-title">
+            Low Attendance
+          </div>
+
+          <div class="overview-value" id="lowAttendance">
+            0
+          </div>
+
+        </div>
+
+        <div class="overview-card">
+
+          <div class="overview-title">
+            New Admissions
+          </div>
+
+          <div
+            class="overview-value"
+            id="newAdmissions"
+          >
+            0
+          </div>
+
+        </div>
+
+        <div class="overview-card">
+
+          <div class="overview-title">
+            Inactive Students
+          </div>
+
+          <div
+            class="overview-value"
+            id="inactiveStudents"
+          >
+            0
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+    <!-- ERP ALERT CENTER -->
+
+    <section class="alerts-section workspace-panel"></section>
+
+      <div class="alerts-header">
+
+        <div>
+
+          <span class="section-kicker">
+            Operations Alerts
+          </span>
+
+          <h2 class="section-title">
+            Student Risk & Action Center
+          </h2>
+
+          <p class="section-subtitle">
+            Monitor fee risks, attendance issues,
+            inactive students, and operational gaps.
+          </p>
+
         </div>
 
       </div>
 
-      <div class="overview-card">
+      <div class="alerts-grid">
 
-        <div class="overview-title">
-          Low Attendance
+        <!-- FEES ALERT -->
+
+        <div class="alert-card alert-card-danger">
+
+          <div class="alert-top">
+
+            <span class="alert-label">
+              Pending Fees
+            </span>
+
+            <span
+              class="alert-count"
+              id="pendingFeesCount"
+            >
+              0
+            </span>
+
+          </div>
+
+          <div
+            class="alert-list"
+            id="pendingFeesBox"
+          >
+          </div>
+
         </div>
 
-        <div class="overview-value" id="lowAttendance">
-          0
+        <!-- LOW ATTENDANCE -->
+
+        <div class="alert-card alert-card-warning">
+
+          <div class="alert-top">
+
+            <span class="alert-label">
+              Low Attendance
+            </span>
+
+            <span
+              class="alert-count"
+              id="lowAttendanceCount"
+            >
+              0
+            </span>
+
+          </div>
+
+          <div
+            class="alert-list"
+            id="lowAttendanceBox"
+          >
+          </div>
+
+        </div>
+
+        <!-- NO BATCH -->
+
+        <div class="alert-card alert-card-neutral">
+
+          <div class="alert-top">
+
+            <span class="alert-label">
+              Missing Batch
+            </span>
+
+            <span
+              class="alert-count"
+              id="missingBatchCount"
+            >
+              0
+            </span>
+
+          </div>
+
+          <div
+            class="alert-list"
+            id="missingBatchBox"
+          >
+          </div>
+
         </div>
 
       </div>
@@ -152,59 +324,115 @@
 
     <!-- FILTERS -->
 
-    <section class="filters-section">
+    <section class="filters-section workspace-panel workspace-panel--filters">
 
-      <div class="search-box">
+      <div class="filters-head">
 
-        <input
-          type="text"
-          id="studentSearch"
-          placeholder="Search student name or phone"
-        />
+        <div>
+
+          <span class="section-kicker">
+            Workspace Filters
+          </span>
+
+          <h2 class="section-title filters-title">
+            Find and segment students faster
+          </h2>
+
+        </div>
 
       </div>
 
-      <div class="filter-group">
+      <div class="filters-toolbar">
 
-        <select id="courseFilter">
+        <div class="search-box">
 
-          <option value="All">
-            All Courses
-          </option>
+          <input
+            type="text"
+            id="studentSearch"
+            placeholder="Search student name or phone"
+          />
 
-          <option value="JEE">
-            JEE
-          </option>
+        </div>
 
-          <option value="NEET">
-            NEET
-          </option>
+        <div class="filter-group">
 
-          <option value="IELTS">
-            IELTS
-          </option>
+          <select id="courseFilter">
 
-          <option value="PSC">
-            PSC
-          </option>
+            <option value="All">
+              All Courses
+            </option>
 
-        </select>
+            <option value="JEE">
+              JEE
+            </option>
 
-        <select id="feesFilter">
+            <option value="NEET">
+              NEET
+            </option>
 
-          <option value="All">
-            All Fee Status
-          </option>
+            <option value="IELTS">
+              IELTS
+            </option>
 
-          <option value="Paid">
-            Paid
-          </option>
+            <option value="PSC">
+              PSC
+            </option>
 
-          <option value="Pending">
-            Pending
-          </option>
+          </select>
 
-        </select>
+          <select id="feesFilter">
+
+            <option value="All">
+              All Fee Status
+            </option>
+
+            <option value="Paid">
+              Paid
+            </option>
+
+            <option value="Pending">
+              Pending
+            </option>
+
+          </select>
+
+          <select id="statusFilter">
+
+            <option value="All">
+              All Status
+            </option>
+
+            <option value="Active">
+              Active
+            </option>
+
+            <option value="Inactive">
+              Inactive
+            </option>
+
+            <option value="Completed">
+              Completed
+            </option>
+
+          </select>
+
+          <select id="attendanceFilter">
+
+            <option value="All">
+              Attendance Status
+            </option>
+
+            <option value="Healthy">
+              Healthy
+            </option>
+
+            <option value="Low">
+              Low Attendance
+            </option>
+
+          </select>
+
+        </div>
 
       </div>
 
@@ -212,45 +440,172 @@
 
     <!-- STUDENTS TABLE -->
 
-    <section class="table-section">
+    <section class="table-section workspace-panel workspace-panel--table">
 
-      <table class="students-table">
+      <div class="table-section-head">
 
-        <thead>
+        <div>
 
-          <tr>
+          <span class="section-kicker">
+            Student Registry
+          </span>
 
-            <th>Student</th>
+          <h2 class="section-title table-title">
+            ERP student grid
+          </h2>
 
-            <th>Phone</th>
+          <p class="section-subtitle">
+            Review academic, financial, and operational details in one data-dense but readable registry.
+          </p>
 
-            <th>Course</th>
+        </div>
 
-            <th>Batch</th>
+      </div>
 
-            <th>Attendance</th>
+      <div class="table-scroll">
 
-            <th>Fees</th>
+        <table class="students-table">
 
-            <th>Status</th>
+          <thead>
 
-            <th>Actions</th>
+            <tr>
 
-          </tr>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Qualification</th>
+              <th>Batch</th>
+              <th>Attendance</th>
+              <th>Total Fee</th>
+              <th>Due Fee</th>
+              <th>Status</th>
+              <th>Actions</th>
 
-        </thead>
+            </tr>
 
-        <tbody id="studentsTableBody">
+          </thead>
 
-          <!-- JS RENDERS HERE -->
+          <tbody id="studentsTableBody">
 
-        </tbody>
+            <!-- JS RENDERS HERE -->
 
-      </table>
+          </tbody>
+
+        </table>
+
+      </div>
 
     </section>
 
   </main>
+
+</div>
+
+<!-- STUDENT PROFILE MODAL -->
+
+<div
+  id="studentModal"
+  class="student-modal hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modalStudentName"
+>
+
+  <div class="student-modal-content">
+
+    <div class="student-modal-header">
+
+      <div class="student-modal-header-copy">
+
+        <span class="modal-kicker">
+          Student Workspace
+        </span>
+
+        <h2 id="modalStudentName">
+          Student Profile
+        </h2>
+
+        <p id="modalStudentCourse">
+          Course
+        </p>
+
+      </div>
+
+      <button
+        class="modal-close"
+        onclick="closeStudentModal()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div class="student-modal-grid">
+
+      <!-- BASIC -->
+
+      <div class="modal-card modal-card--info">
+
+        <h3>
+          Student Information
+        </h3>
+
+        <div id="studentInfo"></div>
+
+      </div>
+
+      <!-- FINANCE -->
+
+      <div class="modal-card modal-card--finance">
+
+        <h3>
+          Financial Overview
+        </h3>
+
+        <div id="studentFinance"></div>
+
+      </div>
+
+      <!-- ACADEMIC -->
+
+      <div class="modal-card modal-card--academic">
+
+        <h3>
+          Academic Status
+        </h3>
+
+        <div id="studentAcademic"></div>
+
+      </div>
+
+      <!-- NOTES -->
+
+      <div class="modal-card modal-card--notes">
+
+        <h3>
+          Internal Notes
+        </h3>
+
+        <textarea
+          id="studentNotes"
+          class="notes-box"
+        ></textarea>
+
+        <div class="modal-card-actions">
+
+          <button
+            class="primary-btn"
+            onclick="saveStudentNotes()"
+          >
+            Save Notes
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
 
 </div>
 
