@@ -715,6 +715,9 @@ function renderPipeline(leads) {
   <span>
     ${aging.stageAgeDays || 0}d in stage
   </span>
+  <span>
+  Score: ${l.score}
+</span>
 
   <span>
     ${escapeHtml(followup.display)}
@@ -891,6 +894,58 @@ async function updateStatus(id, newStatus) {
         last_contacted_at: new Date().toISOString()
       })
       .eq("id", id);
+  // ================= AUTO CREATE STUDENT =================
+
+if (newStatus === "Converted") {
+
+  // CHECK IF STUDENT ALREADY EXISTS
+  const { data: existingStudent } =
+    await supabaseClient
+      .from("Students")
+      .select("id")
+      .eq("lead_id", id)
+      .single();
+
+  // ONLY CREATE IF NOT EXISTS
+  if (!existingStudent) {
+
+    const { error: studentError } =
+      await supabaseClient
+        .from("Students")
+        .insert([{
+
+          business_id: BUSINESS_ID,
+
+          lead_id: lead.id,
+
+          full_name: lead.name,
+
+          phone: lead.phone,
+
+          email: lead.email || null,
+
+          parent_phone: lead.parent_phone || null,
+
+          course: lead.category || "General",
+
+          total_fee: 0,
+
+          paid_fee: 0,
+
+          due_fee: 0,
+
+          status: "Active"
+        }]);
+
+    if (studentError) {
+
+      console.error(studentError);
+
+      alert("Student creation failed");
+    }
+  }
+}   
+
 
   if (updateError) {
     console.error(updateError);
